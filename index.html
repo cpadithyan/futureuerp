@@ -126,7 +126,7 @@
                 <div class="glass-card p-6 rounded-2xl shadow-sm">
                     <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Monthly Profit</h3>
                     <p id="statProfit" class="text-3xl font-bold text-green-600">₹0</p>
-                    <span class="text-xs text-green-500 font-semibold uppercase tracking-wider">Revenue - Expenses</span>
+                    <span class="text-xs text-green-500 font-semibold uppercase tracking-wider">Current Month</span>
                 </div>
                 <div class="glass-card p-6 rounded-2xl shadow-sm">
                     <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Total Collected</h3>
@@ -794,9 +794,45 @@
         // Actions
         document.getElementById('enrollmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const student = { name: document.getElementById('stuName').value, course: document.getElementById('stuCourse').value, admFee: Number(document.getElementById('stuAdmFee').value), mlyFee: Number(document.getElementById('stuMlyFee').value), date: document.getElementById('stuDate').value, nextDueDate: document.getElementById('stuDueDate').value, status: 'Active', totalPaid: 0, createdAt: new Date().toISOString() };
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), student);
-            showNotif('Student enrolled!'); closeModal('studentModal'); e.target.reset();
+            const name = document.getElementById('stuName').value;
+            const admFee = Number(document.getElementById('stuAdmFee').value);
+            const joiningDate = document.getElementById('stuDate').value;
+            
+            const student = { 
+                name: name, 
+                course: document.getElementById('stuCourse').value, 
+                admFee: admFee, 
+                mlyFee: Number(document.getElementById('stuMlyFee').value), 
+                date: joiningDate, 
+                nextDueDate: document.getElementById('stuDueDate').value, 
+                status: 'Active', 
+                totalPaid: admFee, // Setting initial payment balance
+                createdAt: new Date().toISOString() 
+            };
+            
+            try {
+                // 1. Add Student
+                const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), student);
+                
+                // 2. Automatically record Admission Fee transaction for ledger
+                if (admFee > 0) {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { 
+                        studentId: docRef.id, 
+                        studentName: name, 
+                        amount: admFee, 
+                        type: 'Admission', 
+                        paidDate: joiningDate, 
+                        cycleDueDate: 'Joining Day' 
+                    });
+                }
+
+                showNotif('Student enrolled & fee recorded!'); 
+                closeModal('studentModal'); 
+                e.target.reset();
+            } catch (err) {
+                console.error("Enrollment error:", err);
+                showNotif("Error during enrollment");
+            }
         });
 
         document.getElementById('feeForm').addEventListener('submit', async (e) => {
