@@ -129,9 +129,9 @@
                     <span class="text-xs text-green-500 font-semibold uppercase tracking-wider">Revenue - Expenses</span>
                 </div>
                 <div class="glass-card p-6 rounded-2xl shadow-sm">
-                    <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Debt Repayment</h3>
-                    <p id="statDebt" class="text-3xl font-bold text-red-400">₹0</p>
-                    <span class="text-xs text-indigo-400 font-semibold uppercase tracking-wider">20% Logic</span>
+                    <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Total Collected</h3>
+                    <p id="statRevenue" class="text-3xl font-bold">₹0</p>
+                    <span class="text-xs text-indigo-400 font-semibold uppercase tracking-wider">All-Time Income</span>
                 </div>
             </div>
 
@@ -189,10 +189,11 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
                                 <thead>
-                                    <tr class="text-gray-400 uppercase text-[10px] tracking-widest font-bold">
+                                    <tr class="text-gray-400 uppercase text-[10px] tracking-widest font-bold border-b">
                                         <th class="pb-4">Month</th>
                                         <th class="pb-4">Target Students</th>
-                                        <th class="pb-4">Actual Students</th>
+                                        <th class="pb-4">New Admissions</th>
+                                        <th class="pb-4">Actual Revenue</th>
                                         <th class="pb-4">Status</th>
                                     </tr>
                                 </thead>
@@ -413,6 +414,8 @@
             { m: "Jan", t: 25 }, { m: "Feb", t: 40 }, { m: "Mar", t: 60 }, { m: "Apr", t: 80 }, { m: "May", t: 100 }
         ];
 
+        const MONTH_MAP = { "Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "May": 4, "Jun": 5, "Jul": 6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11 };
+
         const PHASES = [
             { id: 1, title: "Foundation (Jan-Feb)", desc: "Collect testimonials and run demo classes.", checklist: ["WhatsApp Broadcast List", "Collect 5 Testimonials", "Free Demo Classes", "Poster Campaign"] },
             { id: 2, title: "Scale (Mar-Apr)", desc: "Daily shorts and referral program.", checklist: ["Daily YouTube Shorts", "Referral Program", "School Outreach", "Google My Business"] },
@@ -558,7 +561,8 @@
         // New Helper: Auto-populate fee amount
         const autoPopulateFee = () => {
             const sId = document.getElementById('feeStudentSelect').value;
-            const type = document.getElementById('feeType').value;
+            const typeSelect = document.getElementById('feeType');
+            const type = typeSelect ? typeSelect.value : 'Monthly';
             const amountInput = document.getElementById('feeAmount');
             if (!sId || !amountInput) return;
             
@@ -570,7 +574,6 @@
             } else if (type === 'Admission') {
                 amountInput.value = student.admFee || 0;
             }
-            // For 'Advance', we leave it as is or empty since it varies
         };
 
         // Init App
@@ -663,15 +666,30 @@
             const activeStudents = appState.students.filter(s => s.status === 'Active');
             const overdue = activeStudents.filter(s => new Date(s.nextDueDate) < today);
 
+            // Global Statistics
+            const totalRev = appState.transactions.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            
+            // Monthly Specific Logic
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            
+            const isCurrentMonth = (dateStr) => {
+                if(!dateStr) return false;
+                const d = new Date(dateStr);
+                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            };
+
+            const monthlyTransactions = appState.transactions.filter(t => isCurrentMonth(t.paidDate));
+            const monthlyExpenses = appState.expenses.filter(e => isCurrentMonth(e.date));
+
+            const monthlyRev = monthlyTransactions.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            const monthlyExp = monthlyExpenses.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            const monthlyProfit = monthlyRev - monthlyExp;
+
             safeSetText('statActive', activeStudents.length);
             safeSetText('statOverdue', overdue.length);
-            
-            const totalRev = appState.transactions.reduce((a, b) => a + (Number(b.amount) || 0), 0);
-            const totalExp = appState.expenses.reduce((a, b) => a + (Number(b.amount) || 0), 0);
-            const profit = totalRev - totalExp;
-
-            safeSetText('statProfit', `₹${profit.toLocaleString()}`);
-            safeSetText('statRevenue', `₹${totalRev.toLocaleString()}`);
+            safeSetText('statProfit', `₹${monthlyProfit.toLocaleString()}`);
+            safeSetText('statRevenue', `₹${totalRev.toLocaleString()}`); // This remains Total
             safeSetText('statDebt', `₹${(totalRev * 0.2).toLocaleString()}`);
 
             const prog = (activeStudents.length / 100) * 100;
@@ -679,22 +697,36 @@
             if (progressEl) progressEl.style.width = Math.min(prog, 100) + '%';
             safeSetText('targetText', `${activeStudents.length} / 100 Students`);
 
-            // Performance Body
-            const currentMonthName = today.toLocaleDateString('en-US', { month: 'short' });
+            // Performance Body (History Table)
             safeSetHTML('performanceBody', TARGETS.map(target => {
-                const isCurrent = target.m === currentMonthName;
+                const targetMonthIdx = MONTH_MAP[target.m];
+                const isCurrent = targetMonthIdx === currentMonth;
+                
+                // Calculate actuals for this specific month
+                const monthAdmissions = appState.students.filter(s => {
+                    const d = new Date(s.date);
+                    return d.getMonth() === targetMonthIdx;
+                }).length;
+
+                const monthRevenue = appState.transactions.filter(t => {
+                    const d = new Date(t.paidDate);
+                    return d.getMonth() === targetMonthIdx;
+                }).reduce((a, b) => a + (Number(b.amount) || 0), 0);
+
                 const status = activeStudents.length >= target.t ? '✅ Met' : '📈 Progress';
+                
                 return `
                     <tr class="border-b border-gray-50 ${isCurrent ? 'bg-blue-50/50' : ''}">
                         <td class="py-3 font-bold">${target.m}</td>
                         <td class="py-3 text-gray-500">${target.t} Students</td>
-                        <td class="py-3 font-bold">${activeStudents.length} Students</td>
+                        <td class="py-3 font-bold">${monthAdmissions} Joined</td>
+                        <td class="py-3 font-bold text-green-600">₹${monthRevenue.toLocaleString()}</td>
                         <td class="py-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${activeStudents.length >= target.t ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">${status}</span></td>
                     </tr>
                 `;
             }).join(''));
 
-            // Transactions & Expenses combined history
+            // Transactions & Expenses history list
             const allHistory = [
                 ...appState.transactions.map(t => ({ ...t, kind: 'fee' })),
                 ...appState.expenses.map(e => ({ ...e, kind: 'exp', paidDate: e.date, studentName: e.name }))
@@ -747,7 +779,7 @@
 
             // Allocation
             const al = [{ n: 'Essentials', v: 0.35, c: 'blue' }, { n: 'Reinvestment', v: 0.20, c: 'indigo' }, { n: 'Debt', v: 0.20, c: 'red' }, { n: 'Savings', v: 0.15, c: 'green' }, { n: 'Personal', v: 0.10, c: 'yellow' }];
-            safeSetHTML('allocationStats', `<h4 class="font-bold mb-6 text-xl">Allocation Logic</h4>` + al.map(cat => `
+            safeSetHTML('allocationStats', `<h4 class="font-bold mb-6 text-xl">Allocation Logic (Based on Total Income)</h4>` + al.map(cat => `
                 <div class="mb-5">
                     <div class="flex justify-between text-xs font-bold mb-1"><span>${cat.n} (${cat.v*100}%)</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div>
                     <div class="w-full bg-gray-100 h-1.5 rounded-full"><div class="bg-${cat.c}-500 h-1.5 rounded-full" style="width:${cat.v*100}%"></div></div>
@@ -797,7 +829,6 @@
                     const tSnap = await getDoc(tRef);
                     if (tSnap.exists()) {
                         const data = tSnap.data();
-                        // Subtract amount from student total balance
                         if (data.studentId) {
                             const sRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', data.studentId);
                             const sSnap = await getDoc(sRef);
