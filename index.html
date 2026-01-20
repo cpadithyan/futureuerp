@@ -555,6 +555,24 @@
             }
         };
 
+        // New Helper: Auto-populate fee amount
+        const autoPopulateFee = () => {
+            const sId = document.getElementById('feeStudentSelect').value;
+            const type = document.getElementById('feeType').value;
+            const amountInput = document.getElementById('feeAmount');
+            if (!sId || !amountInput) return;
+            
+            const student = appState.students.find(s => s.id == sId);
+            if (!student) return;
+
+            if (type === 'Monthly') {
+                amountInput.value = student.mlyFee || 0;
+            } else if (type === 'Admission') {
+                amountInput.value = student.admFee || 0;
+            }
+            // For 'Advance', we leave it as is or empty since it varies
+        };
+
         // Init App
         const init = async () => {
             await signInAnonymously(auth);
@@ -586,6 +604,12 @@
             
             safeSetHTML('stuCourse', COURSE_LIST.map(c => `<option value="${c}">${c}</option>`).join(''));
             
+            // Add listeners for auto-populating fees
+            const feeSelect = document.getElementById('feeStudentSelect');
+            const typeSelect = document.getElementById('feeType');
+            if (feeSelect) feeSelect.addEventListener('change', autoPopulateFee);
+            if (typeSelect) typeSelect.addEventListener('change', autoPopulateFee);
+
             // Set Phase Info
             const currentMonthIdx = new Date().getMonth();
             let activePhase = PHASES[0];
@@ -678,11 +702,16 @@
 
             safeSetHTML('transactionList', allHistory.slice(0, 30).map(item => `
                 <div class="flex justify-between items-center p-4 rounded-2xl border ${item.kind === 'fee' ? 'bg-green-50/50 border-green-100' : 'bg-red-50/50 border-red-100'}">
-                    <div>
+                    <div class="flex-1">
                         <p class="font-bold text-gray-800 text-sm">${item.studentName}</p>
                         <p class="text-[9px] text-gray-400 font-bold uppercase">${item.paidDate} • ${item.kind === 'fee' ? 'FEE COLLECTION' : 'EXPENSE'}</p>
                     </div>
-                    <p class="font-bold text-sm ${item.kind === 'fee' ? 'text-green-600' : 'text-red-600'}">${item.kind === 'fee' ? '+' : '-'}₹${item.amount}</p>
+                    <div class="flex items-center gap-4">
+                        <p class="font-bold text-sm ${item.kind === 'fee' ? 'text-green-600' : 'text-red-600'}">${item.kind === 'fee' ? '+' : '-'}₹${item.amount}</p>
+                        <button onclick="window.deleteEntry('${item.id}', '${item.kind}')" class="text-gray-300 hover:text-red-500 transition-colors p-1" title="Delete faulty transaction">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                 </div>
             `).join(''));
 
@@ -757,7 +786,38 @@
         });
 
         window.updateStatus = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id), { status }); showNotif('Status updated'); };
-        window.deleteStudent = async (id) => { if (confirm("Delete student?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id)); };
+        window.deleteStudent = async (id) => { if (confirm("Delete student? All linked data will be lost.")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id)); };
+        
+        window.deleteEntry = async (id, kind) => {
+            if (!confirm(`Permanently delete this faulty ${kind === 'fee' ? 'fee record' : 'expense'}?`)) return;
+            
+            try {
+                if (kind === 'fee') {
+                    const tRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', id);
+                    const tSnap = await getDoc(tRef);
+                    if (tSnap.exists()) {
+                        const data = tSnap.data();
+                        // Subtract amount from student total balance
+                        if (data.studentId) {
+                            const sRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', data.studentId);
+                            const sSnap = await getDoc(sRef);
+                            if (sSnap.exists()) {
+                                const currentTotal = sSnap.data().totalPaid || 0;
+                                await updateDoc(sRef, { totalPaid: Math.max(0, currentTotal - Number(data.amount)) });
+                            }
+                        }
+                    }
+                    await deleteDoc(tRef);
+                } else {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'expenses', id));
+                }
+                showNotif("Faulty entry removed.");
+            } catch (err) {
+                console.error("Delete entry error:", err);
+                showNotif("Error removing entry.");
+            }
+        };
+
         window.openModal = (id) => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'flex';
