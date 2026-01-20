@@ -78,6 +78,9 @@
             <button onclick="showTab('fees')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
                 <i class="fas fa-hand-holding-dollar"></i> Fee & Expenses
             </button>
+            <button onclick="showTab('reports')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
+                <i class="fas fa-file-invoice"></i> Detailed Reports <i class="fas fa-lock ml-auto text-[10px] opacity-30"></i>
+            </button>
             <button onclick="showTab('growth')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
                 <i class="fas fa-bullseye"></i> Growth Scoreboard <i class="fas fa-lock ml-auto text-[10px] opacity-30"></i>
             </button>
@@ -126,7 +129,10 @@
                 <div class="glass-card p-6 rounded-2xl shadow-sm">
                     <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Monthly Profit</h3>
                     <p id="statProfit" class="text-3xl font-bold text-green-600">₹0</p>
-                    <span class="text-xs text-green-500 font-semibold uppercase tracking-wider">Current Month</span>
+                    <div class="flex justify-between text-[10px] font-bold mt-1">
+                        <span class="text-blue-500" id="statMonthlyRev">Rev: ₹0</span>
+                        <span class="text-red-500" id="statMonthlyExp">Exp: ₹0</span>
+                    </div>
                 </div>
                 <div class="glass-card p-6 rounded-2xl shadow-sm">
                     <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Total Collected</h3>
@@ -148,6 +154,53 @@
                         <div id="miniAlloc" class="space-y-3"></div>
                     </div>
                     <div class="absolute -right-10 -bottom-10 opacity-10 text-8xl"><i class="fas fa-chart-pie"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DETAILED REPORTS TAB -->
+        <div id="reports" class="tab-content space-y-6">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <h3 class="text-xl font-bold">Advanced Institute Overview</h3>
+                <div class="flex gap-2 bg-white p-1 rounded-xl shadow-sm border">
+                    <select id="reportYear" class="p-2 text-sm border-none outline-none font-bold" onchange="updateUI()"></select>
+                    <select id="reportMonth" class="p-2 text-sm border-none outline-none font-bold" onchange="updateUI()">
+                        <option value="all">All-Time View</option>
+                        <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+                        <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+                        <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+                        <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Summary Metrics -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="glass-card p-6 rounded-2xl shadow-sm border-l-4 border-blue-600">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Selected Period Revenue</p>
+                        <p id="repTotalRev" class="text-3xl font-black mt-1">₹0</p>
+                        <div class="mt-4 pt-4 border-t space-y-2">
+                            <div class="flex justify-between text-xs"><span class="text-gray-500">Admissions:</span><span id="repAdmFee" class="font-bold">₹0</span></div>
+                            <div class="flex justify-between text-xs"><span class="text-gray-500">Monthly Fees:</span><span id="repMlyFee" class="font-bold">₹0</span></div>
+                            <div class="flex justify-between text-xs"><span class="text-gray-500">Bulk Advance:</span><span id="repAdvFee" class="font-bold">₹0</span></div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl shadow-sm border-l-4 border-red-600">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Operational Expenses</p>
+                        <p id="repTotalExp" class="text-3xl font-black mt-1 text-red-600">₹0</p>
+                        <p class="text-[10px] text-gray-400 mt-2">Calculated from logged business costs.</p>
+                    </div>
+                </div>
+
+                <!-- Course Popularity & Revenue -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="glass-card p-6 rounded-2xl shadow-sm h-full">
+                        <h4 class="font-bold mb-6 flex items-center gap-2"><i class="fas fa-trophy text-yellow-500"></i> Course Revenue Breakdown</h4>
+                        <div id="courseRevenueList" class="space-y-4">
+                            <!-- JS Driven -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -466,7 +519,7 @@
         window.closeModal = closeModal;
 
         const showTab = (tabId) => {
-            if((tabId === 'growth' || tabId === 'financials') && !appState.isAuthenticated) {
+            if((tabId === 'growth' || tabId === 'financials' || tabId === 'reports') && !appState.isAuthenticated) {
                 appState.targetTab = tabId;
                 const overlay = document.getElementById('pinOverlay');
                 if (overlay) overlay.classList.remove('hidden');
@@ -481,7 +534,8 @@
             
             const pageTitle = document.getElementById('pageTitle');
             if (pageTitle) {
-                pageTitle.innerText = tabId === 'growth' ? "Growth Scoreboard" : (tabId === 'financials' ? "Financial Plan" : tabId.charAt(0).toUpperCase() + tabId.slice(1));
+                const titles = { reports: "Detailed Reports", growth: "Growth Scoreboard", financials: "Financial Plan", dashboard: "Dashboard", students: "Student Database", fees: "Fee & Expenses" };
+                pageTitle.innerText = titles[tabId] || tabId.charAt(0).toUpperCase() + tabId.slice(1);
             }
             updateUI();
         };
@@ -497,32 +551,19 @@
             if(appState.currentInputPin.length < 4) {
                 appState.currentInputPin += num;
                 updatePinVisuals();
-                if(appState.currentInputPin.length === 4) {
-                    validatePin();
-                }
+                if(appState.currentInputPin.length === 4) { validatePin(); }
             }
         };
 
-        window.clearPin = () => {
-            appState.currentInputPin = '';
-            updatePinVisuals();
-        };
+        window.clearPin = () => { appState.currentInputPin = ''; updatePinVisuals(); };
 
-        window.cancelPin = () => {
-            clearPin();
-            const overlay = document.getElementById('pinOverlay');
-            if (overlay) overlay.classList.add('hidden');
-        };
+        window.cancelPin = () => { clearPin(); const overlay = document.getElementById('pinOverlay'); if (overlay) overlay.classList.add('hidden'); };
 
         const updatePinVisuals = () => {
             for(let i = 1; i <= 4; i++) {
                 const dot = document.getElementById(`pin-${i}`);
                 if(dot) {
-                    if(appState.currentInputPin.length >= i) {
-                        dot.classList.add('bg-blue-500', 'border-blue-500');
-                    } else {
-                        dot.classList.remove('bg-blue-500', 'border-blue-500');
-                    }
+                    if(appState.currentInputPin.length >= i) { dot.classList.add('bg-blue-500', 'border-blue-500'); } else { dot.classList.remove('bg-blue-500', 'border-blue-500'); }
                 }
             }
         };
@@ -544,18 +585,13 @@
         window.updatePin = async () => {
             const input = document.getElementById('newPin');
             const newPin = input ? input.value : '';
-            if(newPin.length !== 4 || isNaN(newPin)) {
-                showNotif("PIN must be 4 digits");
-                return;
-            }
+            if(newPin.length !== 4 || isNaN(newPin)) { showNotif("PIN must be 4 digits"); return; }
             try {
                 const pinRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
                 await setDoc(pinRef, { pin: newPin }, { merge: true });
                 showNotif("PIN Updated Successfully");
                 if (input) input.value = '';
-            } catch (err) {
-                showNotif("Error updating PIN");
-            }
+            } catch (err) { showNotif("Error updating PIN"); }
         };
 
         // New Helper: Auto-populate fee amount
@@ -565,15 +601,9 @@
             const type = typeSelect ? typeSelect.value : 'Monthly';
             const amountInput = document.getElementById('feeAmount');
             if (!sId || !amountInput) return;
-            
             const student = appState.students.find(s => s.id == sId);
             if (!student) return;
-
-            if (type === 'Monthly') {
-                amountInput.value = student.mlyFee || 0;
-            } else if (type === 'Admission') {
-                amountInput.value = student.admFee || 0;
-            }
+            if (type === 'Monthly') { amountInput.value = student.mlyFee || 0; } else if (type === 'Admission') { amountInput.value = student.admFee || 0; }
         };
 
         // Init App
@@ -583,30 +613,34 @@
                 if (user) {
                     appState.user = user;
                     const overlay = document.getElementById('loadingOverlay');
-                    if (overlay) {
-                        overlay.style.opacity = '0';
-                        setTimeout(() => overlay.style.display = 'none', 500);
-                    }
+                    if (overlay) { overlay.style.opacity = '0'; setTimeout(() => overlay.style.display = 'none', 500); }
                     startSync();
                 }
             });
 
             const today = new Date().toISOString().split('T')[0];
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth();
+
             safeSetText('currentDate', new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
             
-            const stuDateInput = document.getElementById('stuDate');
-            if (stuDateInput) stuDateInput.value = today;
-            const feeDateInput = document.getElementById('feeDate');
-            if (feeDateInput) feeDateInput.value = today;
-            const expDateInput = document.getElementById('expDate');
-            if (expDateInput) expDateInput.value = today;
+            const stuDateInput = document.getElementById('stuDate'); if (stuDateInput) stuDateInput.value = today;
+            const feeDateInput = document.getElementById('feeDate'); if (feeDateInput) feeDateInput.value = today;
+            const expDateInput = document.getElementById('expDate'); if (expDateInput) expDateInput.value = today;
             
             const nextMonth = new Date(); nextMonth.setDate(nextMonth.getDate() + 30);
-            const stuDueDateInput = document.getElementById('stuDueDate');
-            if (stuDueDateInput) stuDueDateInput.value = nextMonth.toISOString().split('T')[0];
+            const stuDueDateInput = document.getElementById('stuDueDate'); if (stuDueDateInput) stuDueDateInput.value = nextMonth.toISOString().split('T')[0];
             
             safeSetHTML('stuCourse', COURSE_LIST.map(c => `<option value="${c}">${c}</option>`).join(''));
             
+            // Populate Year and Month selects for Reports
+            const yrSelect = document.getElementById('reportYear');
+            if(yrSelect) {
+                yrSelect.innerHTML = [currentYear, currentYear-1].map(y => `<option value="${y}" ${y==currentYear?'selected':''}>${y}</option>`).join('');
+            }
+            const moSelect = document.getElementById('reportMonth');
+            if(moSelect) moSelect.value = currentMonth;
+
             // Add listeners for auto-populating fees
             const feeSelect = document.getElementById('feeStudentSelect');
             const typeSelect = document.getElementById('feeType');
@@ -615,224 +649,132 @@
 
             // Set Phase Info
             const currentMonthIdx = new Date().getMonth();
-            let activePhase = PHASES[0];
-            if(currentMonthIdx >= 2 && currentMonthIdx <= 3) activePhase = PHASES[1];
-            if(currentMonthIdx >= 4) activePhase = PHASES[2];
-            
-            safeSetText('currentPhaseTitle', activePhase.title);
-            safeSetText('currentPhaseDesc', activePhase.desc);
-            safeSetHTML('phaseChecklist', activePhase.checklist.map(item => `
-                <div class="flex items-center gap-3">
-                    <div class="w-5 h-5 border-2 border-white/40 rounded flex items-center justify-center text-[10px]"><i class="fas fa-check"></i></div>
-                    <span class="text-xs font-medium">${item}</span>
-                </div>
-            `).join(''));
+            let activePhase = PHASES[0]; if(currentMonthIdx >= 2 && currentMonthIdx <= 3) activePhase = PHASES[1]; if(currentMonthIdx >= 4) activePhase = PHASES[2];
+            safeSetText('currentPhaseTitle', activePhase.title); safeSetText('currentPhaseDesc', activePhase.desc);
+            safeSetHTML('phaseChecklist', activePhase.checklist.map(item => `<div class="flex items-center gap-3"><div class="w-5 h-5 border-2 border-white/40 rounded flex items-center justify-center text-[10px]"><i class="fas fa-check"></i></div><span class="text-xs font-medium">${item}</span></div>`).join(''));
         };
 
         const startSync = () => {
             if (!appState.user) return;
-
-            // Sync PIN
             const pinRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
-            onSnapshot(pinRef, (snap) => {
-                if(snap.exists()) {
-                    appState.adminPin = snap.data().pin;
-                } else {
-                    setDoc(pinRef, { pin: '4568' });
-                }
-            }, (err) => console.error("PIN sync error:", err));
-
+            onSnapshot(pinRef, (snap) => { if(snap.exists()) { appState.adminPin = snap.data().pin; } else { setDoc(pinRef, { pin: '4568' }); } });
             const sRef = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-            onSnapshot(sRef, (snap) => { 
-                appState.students = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); 
-                updateUI(); 
-            }, (err) => console.error("Students sync error:", err));
-            
+            onSnapshot(sRef, (snap) => { appState.students = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
             const tRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
-            onSnapshot(tRef, (snap) => { 
-                appState.transactions = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); 
-                updateUI(); 
-            }, (err) => console.error("Transactions sync error:", err));
-
+            onSnapshot(tRef, (snap) => { appState.transactions = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
             const eRef = collection(db, 'artifacts', appId, 'public', 'data', 'expenses');
-            onSnapshot(eRef, (snap) => { 
-                appState.expenses = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); 
-                updateUI(); 
-            }, (err) => console.error("Expenses sync error:", err));
+            onSnapshot(eRef, (snap) => { appState.expenses = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
+        };
+
+        const isPeriodMatch = (dateStr, month, year) => {
+            if (!dateStr) return false;
+            const [y, m, d] = dateStr.split('-').map(Number);
+            if (month === 'all') return y === Number(year);
+            return y === Number(year) && (m - 1) === Number(month);
         };
 
         const updateUI = () => {
             const today = new Date();
+            const currMoIdx = today.getMonth();
+            const currYr = today.getFullYear();
             const activeStudents = appState.students.filter(s => s.status === 'Active');
             const overdue = activeStudents.filter(s => new Date(s.nextDueDate) < today);
 
             // Global Statistics
             const totalRev = appState.transactions.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            const totalExpAll = appState.expenses.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+
+            // Report Tab Filtering Logic
+            const repMo = document.getElementById('reportMonth')?.value || currMoIdx;
+            const repYr = document.getElementById('reportYear')?.value || currYr;
             
-            // Monthly Specific Logic
-            const currentMonth = today.getMonth();
-            const currentYear = today.getFullYear();
+            const filteredTrans = appState.transactions.filter(t => isPeriodMatch(t.paidDate, repMo, repYr));
+            const filteredExp = appState.expenses.filter(e => isPeriodMatch(e.date, repMo, repYr));
+
+            const repRevTotal = filteredTrans.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            const repExpTotal = filteredExp.reduce((a, b) => a + (Number(b.amount) || 0), 0);
             
-            const isCurrentMonth = (dateStr) => {
-                if(!dateStr) return false;
-                const d = new Date(dateStr);
-                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-            };
+            safeSetText('repTotalRev', `₹${repRevTotal.toLocaleString()}`);
+            safeSetText('repTotalExp', `₹${repExpTotal.toLocaleString()}`);
+            safeSetText('repAdmFee', `₹${filteredTrans.filter(t => t.type === 'Admission').reduce((a,b) => a + Number(b.amount), 0).toLocaleString()}`);
+            safeSetText('repMlyFee', `₹${filteredTrans.filter(t => t.type === 'Monthly').reduce((a,b) => a + Number(b.amount), 0).toLocaleString()}`);
+            safeSetText('repAdvFee', `₹${filteredTrans.filter(t => t.type === 'Advance').reduce((a,b) => a + Number(b.amount), 0).toLocaleString()}`);
 
-            const monthlyTransactions = appState.transactions.filter(t => isCurrentMonth(t.paidDate));
-            const monthlyExpenses = appState.expenses.filter(e => isCurrentMonth(e.date));
+            // Dashboard Monthly (Always Current Month)
+            const monthlyRevSum = appState.transactions.filter(t => isPeriodMatch(t.paidDate, currMoIdx, currYr)).reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            const monthlyExpSum = appState.expenses.filter(e => isPeriodMatch(e.date, currMoIdx, currYr)).reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            safeSetText('statProfit', `₹${(monthlyRevSum - monthlyExpSum).toLocaleString()}`);
+            safeSetText('statMonthlyRev', `Rev: ₹${monthlyRevSum.toLocaleString()}`);
+            safeSetText('statMonthlyExp', `Exp: ₹${monthlyExpSum.toLocaleString()}`);
 
-            const monthlyRev = monthlyTransactions.reduce((a, b) => a + (Number(b.amount) || 0), 0);
-            const monthlyExp = monthlyExpenses.reduce((a, b) => a + (Number(b.amount) || 0), 0);
-            const monthlyProfit = monthlyRev - monthlyExp;
-
+            // Global Labels
             safeSetText('statActive', activeStudents.length);
             safeSetText('statOverdue', overdue.length);
-            safeSetText('statProfit', `₹${monthlyProfit.toLocaleString()}`);
-            safeSetText('statRevenue', `₹${totalRev.toLocaleString()}`); // This remains Total
+            safeSetText('statRevenue', `₹${totalRev.toLocaleString()}`); 
             safeSetText('statDebt', `₹${(totalRev * 0.2).toLocaleString()}`);
 
             const prog = (activeStudents.length / 100) * 100;
-            const progressEl = document.getElementById('targetProgress');
-            if (progressEl) progressEl.style.width = Math.min(prog, 100) + '%';
+            const progressEl = document.getElementById('targetProgress'); if (progressEl) progressEl.style.width = Math.min(prog, 100) + '%';
             safeSetText('targetText', `${activeStudents.length} / 100 Students`);
 
-            // Performance Body (History Table)
+            // Course Breakdown Logic
+            const courseMap = {};
+            filteredTrans.forEach(t => {
+                const s = appState.students.find(stu => stu.id === t.studentId);
+                const cName = s ? s.course : 'General/Bulk';
+                courseMap[cName] = (courseMap[cName] || 0) + Number(t.amount);
+            });
+            const sortedCourses = Object.entries(courseMap).sort((a,b) => b[1] - a[1]);
+            safeSetHTML('courseRevenueList', sortedCourses.length ? sortedCourses.map(([name, amt]) => `
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs font-bold"><span>${name}</span><span>₹${amt.toLocaleString()}</span></div>
+                    <div class="w-full bg-gray-100 h-1.5 rounded-full"><div class="bg-blue-500 h-1.5 rounded-full" style="width: ${Math.min((amt/repRevTotal)*100 || 0, 100)}%"></div></div>
+                </div>
+            `).join('') : '<p class="text-sm text-gray-400 italic">No revenue recorded for selected period.</p>');
+
+            // Performance Body
             safeSetHTML('performanceBody', TARGETS.map(target => {
-                const targetMonthIdx = MONTH_MAP[target.m];
-                const isCurrent = targetMonthIdx === currentMonth;
-                
-                // Calculate actuals for this specific month
-                const monthAdmissions = appState.students.filter(s => {
-                    const d = new Date(s.date);
-                    return d.getMonth() === targetMonthIdx;
-                }).length;
-
-                const monthRevenue = appState.transactions.filter(t => {
-                    const d = new Date(t.paidDate);
-                    return d.getMonth() === targetMonthIdx;
-                }).reduce((a, b) => a + (Number(b.amount) || 0), 0);
-
+                const targetMo = MONTH_MAP[target.m];
+                const monthAdmissions = appState.students.filter(s => { if (!s.date) return false; const [y, m, d] = s.date.split('-').map(Number); return (m - 1) === targetMo && y === currYr; }).length;
+                const monthRev = appState.transactions.filter(t => { if (!t.paidDate) return false; const [y, m, d] = t.paidDate.split('-').map(Number); return (m - 1) === targetMo && y === currYr; }).reduce((a, b) => a + (Number(b.amount) || 0), 0);
                 const status = activeStudents.length >= target.t ? '✅ Met' : '📈 Progress';
-                
-                return `
-                    <tr class="border-b border-gray-50 ${isCurrent ? 'bg-blue-50/50' : ''}">
-                        <td class="py-3 font-bold">${target.m}</td>
-                        <td class="py-3 text-gray-500">${target.t} Students</td>
-                        <td class="py-3 font-bold">${monthAdmissions} Joined</td>
-                        <td class="py-3 font-bold text-green-600">₹${monthRevenue.toLocaleString()}</td>
-                        <td class="py-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${activeStudents.length >= target.t ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">${status}</span></td>
-                    </tr>
-                `;
+                return `<tr class="border-b border-gray-50 ${targetMo === currMoIdx ? 'bg-blue-50/50' : ''}"><td class="py-3 font-bold">${target.m}</td><td class="py-3 text-gray-500">${target.t} Students</td><td class="py-3 font-bold">${monthAdmissions} Joined</td><td class="py-3 font-bold text-green-600">₹${monthRev.toLocaleString()}</td><td class="py-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${activeStudents.length >= target.t ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">${status}</span></td></tr>`;
             }).join(''));
 
-            // Transactions & Expenses history list
-            const allHistory = [
-                ...appState.transactions.map(t => ({ ...t, kind: 'fee' })),
-                ...appState.expenses.map(e => ({ ...e, kind: 'exp', paidDate: e.date, studentName: e.name }))
-            ].sort((a,b) => new Date(b.paidDate) - new Date(a.paidDate));
-
-            safeSetHTML('transactionList', allHistory.slice(0, 30).map(item => `
-                <div class="flex justify-between items-center p-4 rounded-2xl border ${item.kind === 'fee' ? 'bg-green-50/50 border-green-100' : 'bg-red-50/50 border-red-100'}">
-                    <div class="flex-1">
-                        <p class="font-bold text-gray-800 text-sm">${item.studentName}</p>
-                        <p class="text-[9px] text-gray-400 font-bold uppercase">${item.paidDate} • ${item.kind === 'fee' ? 'FEE COLLECTION' : 'EXPENSE'}</p>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <p class="font-bold text-sm ${item.kind === 'fee' ? 'text-green-600' : 'text-red-600'}">${item.kind === 'fee' ? '+' : '-'}₹${item.amount}</p>
-                        <button onclick="window.deleteEntry('${item.id}', '${item.kind}')" class="text-gray-300 hover:text-red-500 transition-colors p-1" title="Delete faulty transaction">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join(''));
+            // Transactions history list
+            const allHistory = [...appState.transactions.map(t => ({ ...t, kind: 'fee' })), ...appState.expenses.map(e => ({ ...e, kind: 'exp', paidDate: e.date, studentName: e.name }))].sort((a,b) => new Date(b.paidDate) - new Date(a.paidDate));
+            safeSetHTML('transactionList', allHistory.slice(0, 30).map(item => `<div class="flex justify-between items-center p-4 rounded-2xl border ${item.kind === 'fee' ? 'bg-green-50/50 border-green-100' : 'bg-red-50/50 border-red-100'}"><div class="flex-1"><p class="font-bold text-gray-800 text-sm">${item.studentName}</p><p class="text-[9px] text-gray-400 font-bold uppercase">${item.paidDate} • ${item.kind === 'fee' ? 'FEE COLLECTION' : 'EXPENSE'}</p></div><div class="flex items-center gap-4"><p class="font-bold text-sm ${item.kind === 'fee' ? 'text-green-600' : 'text-red-600'}">${item.kind === 'fee' ? '+' : '-'}₹${item.amount}</p><button onclick="window.deleteEntry('${item.id}', '${item.kind}')" class="text-gray-300 hover:text-red-500 transition-colors p-1"><i class="fas fa-trash-alt"></i></button></div></div>`).join(''));
 
             // Follow-ups
             const followUps = overdue.sort((a,b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
-            safeSetHTML('followUpList', followUps.length ? followUps.slice(0, 5).map(s => `
-                <div class="flex justify-between items-center p-3 bg-red-50 border border-red-100 rounded-xl">
-                    <span class="text-xs font-bold text-red-700">${s.name}</span>
-                    <span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-red-500">Due: ${s.nextDueDate}</span>
-                </div>
-            `).join('') : '<p class="text-sm text-gray-400 italic">Everyone is up to date!</p>');
+            safeSetHTML('followUpList', followUps.length ? followUps.slice(0, 5).map(s => `<div class="flex justify-between items-center p-3 bg-red-50 border border-red-100 rounded-xl"><span class="text-xs font-bold text-red-700">${s.name}</span><span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-red-500">Due: ${s.nextDueDate}</span></div>`).join('') : '<p class="text-sm text-gray-400 italic">Everyone is up to date!</p>');
 
-            // Table
+            // Student Table
             safeSetHTML('studentTableBody', appState.students.map(s => {
                 const isOverdue = new Date(s.nextDueDate) < today && s.status === 'Active';
-                return `
-                    <tr class="border-b hover:bg-gray-50 text-sm">
-                        <td class="p-4"><p class="font-bold text-gray-800">${s.name}</p></td>
-                        <td class="p-4 text-xs max-w-[120px] truncate">${s.course}</td>
-                        <td class="p-4 font-semibold text-blue-600">₹${s.mlyFee}</td>
-                        <td class="p-4"><span class="px-2 py-1 rounded-lg font-bold text-[10px] ${isOverdue ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${s.nextDueDate}</span></td>
-                        <td class="p-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">${s.status}</span></td>
-                        <td class="p-4 flex gap-3">
-                            <button onclick="window.updateStatus('${s.id}', '${s.status === 'Active' ? 'Stopped' : 'Active'}')" class="text-gray-400 hover:text-blue-600"><i class="fas ${s.status === 'Active' ? 'fa-stop-circle' : 'fa-play-circle'}"></i></button>
-                            <button onclick="window.deleteStudent('${s.id}')" class="text-gray-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
+                return `<tr class="border-b hover:bg-gray-50 text-sm"><td class="p-4"><p class="font-bold text-gray-800">${s.name}</p></td><td class="p-4 text-xs max-w-[120px] truncate">${s.course}</td><td class="p-4 font-semibold text-blue-600">₹${s.mlyFee}</td><td class="p-4"><span class="px-2 py-1 rounded-lg font-bold text-[10px] ${isOverdue ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${s.nextDueDate}</span></td><td class="p-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">${s.status}</span></td><td class="p-4 flex gap-3"><button onclick="window.updateStatus('${s.id}', '${s.status === 'Active' ? 'Stopped' : 'Active'}')" class="text-gray-400 hover:text-blue-600"><i class="fas ${s.status === 'Active' ? 'fa-stop-circle' : 'fa-play-circle'}"></i></button><button onclick="window.deleteStudent('${s.id}')" class="text-gray-300 hover:text-red-500"><i class="fas fa-trash"></i></button></td></tr>`;
             }).join(''));
 
-            safeSetHTML('feeStudentSelect', '<option value="">Select Student...</option>' + 
-                activeStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join(''));
+            safeSetHTML('feeStudentSelect', '<option value="">Select Student...</option>' + activeStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join(''));
 
-            // Allocation
+            // Allocation Logic
             const al = [{ n: 'Essentials', v: 0.35, c: 'blue' }, { n: 'Reinvestment', v: 0.20, c: 'indigo' }, { n: 'Debt', v: 0.20, c: 'red' }, { n: 'Savings', v: 0.15, c: 'green' }, { n: 'Personal', v: 0.10, c: 'yellow' }];
-            safeSetHTML('allocationStats', `<h4 class="font-bold mb-6 text-xl">Allocation Logic (Based on Total Income)</h4>` + al.map(cat => `
-                <div class="mb-5">
-                    <div class="flex justify-between text-xs font-bold mb-1"><span>${cat.n} (${cat.v*100}%)</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div>
-                    <div class="w-full bg-gray-100 h-1.5 rounded-full"><div class="bg-${cat.c}-500 h-1.5 rounded-full" style="width:${cat.v*100}%"></div></div>
-                </div>
-            `).join(''));
-
-            safeSetHTML('miniAlloc', al.slice(0, 3).map(cat => `
-                <div class="flex justify-between text-xs font-medium opacity-80"><span>${cat.n}</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div>
-            `).join(''));
+            safeSetHTML('allocationStats', `<h4 class="font-bold mb-6 text-xl">Allocation Logic (Based on Total Income)</h4>` + al.map(cat => `<div class="mb-5"><div class="flex justify-between text-xs font-bold mb-1"><span>${cat.n} (${cat.v*100}%)</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div><div class="w-full bg-gray-100 h-1.5 rounded-full"><div class="bg-${cat.c}-500 h-1.5 rounded-full" style="width:${cat.v*100}%"></div></div></div>`).join(''));
+            safeSetHTML('miniAlloc', al.slice(0, 3).map(cat => `<div class="flex justify-between text-xs font-medium opacity-80"><span>${cat.n}</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div>`).join(''));
         };
 
-        // Actions
+        // ACTIONS
         document.getElementById('enrollmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('stuName').value;
             const admFee = Number(document.getElementById('stuAdmFee').value);
             const joiningDate = document.getElementById('stuDate').value;
-            
-            const student = { 
-                name: name, 
-                course: document.getElementById('stuCourse').value, 
-                admFee: admFee, 
-                mlyFee: Number(document.getElementById('stuMlyFee').value), 
-                date: joiningDate, 
-                nextDueDate: document.getElementById('stuDueDate').value, 
-                status: 'Active', 
-                totalPaid: admFee, // Setting initial payment balance
-                createdAt: new Date().toISOString() 
-            };
-            
+            const student = { name: name, course: document.getElementById('stuCourse').value, admFee: admFee, mlyFee: Number(document.getElementById('stuMlyFee').value), date: joiningDate, nextDueDate: document.getElementById('stuDueDate').value, status: 'Active', totalPaid: admFee, createdAt: new Date().toISOString() };
             try {
-                // 1. Add Student
                 const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), student);
-                
-                // 2. Automatically record Admission Fee transaction for ledger
-                if (admFee > 0) {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { 
-                        studentId: docRef.id, 
-                        studentName: name, 
-                        amount: admFee, 
-                        type: 'Admission', 
-                        paidDate: joiningDate, 
-                        cycleDueDate: 'Joining Day' 
-                    });
-                }
-
-                showNotif('Student enrolled & fee recorded!'); 
-                closeModal('studentModal'); 
-                e.target.reset();
-            } catch (err) {
-                console.error("Enrollment error:", err);
-                showNotif("Error during enrollment");
-            }
+                if (admFee > 0) { await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: docRef.id, studentName: name, amount: admFee, type: 'Admission', paidDate: joiningDate, cycleDueDate: 'Joining Day' }); }
+                showNotif('Student enrolled & fee recorded!'); closeModal('studentModal'); e.target.reset();
+            } catch (err) { showNotif("Error during enrollment"); }
         });
 
         document.getElementById('feeForm').addEventListener('submit', async (e) => {
@@ -840,10 +782,10 @@
             const sId = document.getElementById('feeStudentSelect').value;
             const student = appState.students.find(s => s.id == sId);
             const paidDate = document.getElementById('feeDate').value;
+            const amount = Number(document.getElementById('feeAmount').value);
             const nextDueObj = new Date(paidDate); nextDueObj.setDate(nextDueObj.getDate() + 30);
-            
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: sId, studentName: student.name, amount: Number(document.getElementById('feeAmount').value), type: document.getElementById('feeType').value, paidDate, cycleDueDate: student.nextDueDate });
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', sId), { nextDueDate: nextDueObj.toISOString().split('T')[0], totalPaid: (student.totalPaid || 0) + Number(document.getElementById('feeAmount').value) });
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: sId, studentName: student.name, amount: amount, type: document.getElementById('feeType').value, paidDate, cycleDueDate: student.nextDueDate });
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', sId), { nextDueDate: nextDueObj.toISOString().split('T')[0], totalPaid: (student.totalPaid || 0) + amount });
             showNotif('Payment Recorded!'); e.target.reset();
         });
 
@@ -858,7 +800,6 @@
         
         window.deleteEntry = async (id, kind) => {
             if (!confirm(`Permanently delete this faulty ${kind === 'fee' ? 'fee record' : 'expense'}?`)) return;
-            
             try {
                 if (kind === 'fee') {
                     const tRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', id);
@@ -868,38 +809,18 @@
                         if (data.studentId) {
                             const sRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', data.studentId);
                             const sSnap = await getDoc(sRef);
-                            if (sSnap.exists()) {
-                                const currentTotal = sSnap.data().totalPaid || 0;
-                                await updateDoc(sRef, { totalPaid: Math.max(0, currentTotal - Number(data.amount)) });
-                            }
+                            if (sSnap.exists()) { const currentTotal = sSnap.data().totalPaid || 0; await updateDoc(sRef, { totalPaid: Math.max(0, currentTotal - Number(data.amount)) }); }
                         }
                     }
                     await deleteDoc(tRef);
-                } else {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'expenses', id));
-                }
+                } else { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'expenses', id)); }
                 showNotif("Faulty entry removed.");
-            } catch (err) {
-                console.error("Delete entry error:", err);
-                showNotif("Error removing entry.");
-            }
+            } catch (err) { showNotif("Error removing entry."); }
         };
 
-        window.openModal = (id) => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'flex';
-        }
-        window.exportBackup = () => {
-            const data = { students: appState.students, transactions: appState.transactions, expenses: appState.expenses, exportedAt: new Date().toISOString() };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a"); a.href = url; a.download = `FutureU_Backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
-        };
-
-        window.toggleTask = (type) => {
-            showNotif(`${type.toUpperCase()} recorded for today.`);
-        };
-
+        window.openModal = (id) => { const el = document.getElementById(id); if (el) el.style.display = 'flex'; }
+        window.exportBackup = () => { const data = { students: appState.students, transactions: appState.transactions, expenses: appState.expenses, exportedAt: new Date().toISOString() }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `FutureU_Backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); };
+        window.toggleTask = (type) => { showNotif(`${type.toUpperCase()} recorded for today.`); };
         init();
     </script>
 </body>
