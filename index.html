@@ -91,9 +91,9 @@
             </button>
         </nav>
         <div class="absolute bottom-6 left-6 right-6">
-            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-4 text-white shadow-lg">
-                <p class="text-[10px] font-bold uppercase opacity-80 text-center tracking-widest">Vision 2027</p>
-                <p id="visionProgressText" class="text-xl font-black mt-1 text-center">0 / 500</p>
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-4 text-white shadow-lg text-center">
+                <p class="text-[10px] font-bold uppercase opacity-80 tracking-widest">Vision 2027</p>
+                <p id="visionProgressText" class="text-xl font-black mt-1">0 / 500</p>
                 <div class="w-full bg-white/20 rounded-full h-1.5 mt-3">
                     <div id="visionBar" class="bg-white h-1.5 rounded-full" style="width: 0%"></div>
                 </div>
@@ -103,7 +103,7 @@
 
     <!-- Main Content -->
     <main class="lg:ml-64 p-4 lg:p-10">
-        <header class="flex justify-between items-center mb-10">
+        <header class="flex justify-between items-center mb-10 text-center sm:text-left">
             <button class="lg:hidden text-2xl p-2 bg-white rounded-xl shadow-sm" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
             <div>
                 <h2 id="pageTitle" class="text-3xl font-black tracking-tight text-slate-800">Dashboard</h2>
@@ -125,7 +125,7 @@
                 <div class="glass-card p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border-b-4 border-blue-500">
                     <h3 class="text-gray-400 font-bold text-xs uppercase tracking-widest">Active Enrollment</h3>
                     <p id="statActive" class="text-4xl font-black mt-2">0</p>
-                    <span id="targetSubtext" class="text-xs text-blue-500 font-bold mt-2 inline-block">Goal: 500 Students</span>
+                    <span id="targetSubtext" class="text-xs text-blue-500 font-bold mt-2 inline-block text-center">Goal: 500 Students</span>
                 </div>
                 <div class="glass-card p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border-b-4 border-red-500">
                     <h3 class="text-gray-400 font-bold text-xs uppercase tracking-widest">Dues Pending</h3>
@@ -213,11 +213,16 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-1 space-y-8">
                     <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-gray-100">
-                        <h4 class="font-black text-lg mb-6 text-blue-600 flex items-center gap-2"><i class="fas fa-wallet"></i> Collect Fee</h4>
+                        <h4 class="font-black text-lg mb-6 text-blue-600 flex items-center gap-2" id="feeFormTitle"><i class="fas fa-wallet"></i> Collect Fee</h4>
                         <form id="feeForm" class="space-y-5">
-                            <div>
+                            <input type="hidden" id="editTransId">
+                            <div id="studentSelectContainer">
                                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Student</label>
                                 <select id="feeStudentSelect" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm" required></select>
+                            </div>
+                            <div id="studentNameDisplay" class="hidden">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Correcting Entry for</label>
+                                <p id="editStudentName" class="p-4 bg-blue-50 text-blue-800 rounded-2xl font-black text-sm mt-1"></p>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -237,7 +242,10 @@
                                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Paid Date</label>
                                 <input type="date" id="feeDate" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm" required>
                             </div>
-                            <button type="submit" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 shadow-xl transition-all">Submit Receipt</button>
+                            <div class="flex gap-2">
+                                <button type="submit" id="feeSubmitBtn" class="flex-1 bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 shadow-xl transition-all">Submit Receipt</button>
+                                <button type="button" id="cancelFeeEditBtn" onclick="resetFeeForm()" class="hidden px-6 bg-slate-200 text-slate-700 rounded-2xl font-black hover:bg-slate-300">Cancel</button>
+                            </div>
                         </form>
                     </div>
 
@@ -318,9 +326,9 @@
                 </div>
             </div>
 
-            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center">
                 <h4 class="font-black text-lg mb-6"><i class="fas fa-users-viewfinder text-indigo-500"></i> Referral Sources</h4>
-                <div id="referralList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center"></div>
+                <div id="referralList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
             </div>
         </div>
 
@@ -332,7 +340,7 @@
                         <h4 class="font-black text-lg mb-8 flex items-center gap-3"><i class="fas fa-calendar-check text-blue-600"></i> Strategy Checklist</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-4">
-                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Daily Non-Negotiables</p>
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Daily Non-Negotiables</p>
                                 <label class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100">
                                     <input type="checkbox" class="w-6 h-6 rounded-lg text-blue-600 focus:ring-0 border-gray-200" onchange="toggleTask('followup')">
                                     <span class="text-sm font-extrabold">5 Follow-up calls/day</span>
@@ -343,7 +351,7 @@
                                 </label>
                             </div>
                             <div class="space-y-4">
-                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Weekly Growth Actions</p>
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Weekly Growth Actions</p>
                                 <label class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100">
                                     <input type="checkbox" class="w-6 h-6 rounded-lg text-blue-600 focus:ring-0 border-gray-200" onchange="toggleTask('social')">
                                     <span class="text-sm font-extrabold">3 Social Posts/week</span>
@@ -364,7 +372,7 @@
                                         <th class="pb-6">Milestone</th>
                                         <th class="pb-6">Target</th>
                                         <th class="pb-6">Current</th>
-                                        <th class="pb-6">Period Revenue</th>
+                                        <th class="pb-6 text-center">Period Revenue</th>
                                         <th class="pb-6 text-right">Result</th>
                                     </tr>
                                 </thead>
@@ -402,7 +410,7 @@
                         </div>
                     </div>
                     <div class="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-2xl">
-                        <h4 class="font-black text-xl mb-6 text-blue-400">Strategic Debt Rules</h4>
+                        <h4 class="font-black text-xl mb-6 text-blue-400 text-center">Strategic Debt Rules</h4>
                         <div class="space-y-5 text-sm font-semibold opacity-90 leading-relaxed">
                             <p class="flex items-start gap-4"><i class="fas fa-bolt text-yellow-400 mt-1"></i> Profits < Target = 0% Personal bucket.</p>
                             <p class="flex items-start gap-4"><i class="fas fa-bolt text-yellow-400 mt-1"></i> Jan-Mar focus is maximum debt repayment.</p>
@@ -417,12 +425,13 @@
         </div>
     </main>
 
-    <!-- Admission Modal -->
+    <!-- Student Modal (Add/Edit) -->
     <div id="studentModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[100] p-4 backdrop-blur-xl">
         <div class="bg-white w-full max-w-2xl rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
             <button onclick="closeModal('studentModal')" class="absolute top-8 right-8 text-gray-400 hover:text-black text-3xl font-black transition-all">&times;</button>
-            <h3 class="text-3xl font-black text-slate-800 mb-8">Admission Registry</h3>
+            <h3 class="text-3xl font-black text-slate-800 mb-8" id="studentModalTitle">Admission Registry</h3>
             <form id="enrollmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input type="hidden" id="editStudentId">
                 <div class="md:col-span-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Student Name</label>
                     <input type="text" id="stuName" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold" placeholder="Full name" required>
@@ -456,7 +465,7 @@
                     <input type="date" id="stuDueDate" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold" required>
                 </div>
                 <div class="md:col-span-2 pt-4">
-                    <button type="submit" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 shadow-2xl transition-all">Authorize Admission</button>
+                    <button type="submit" id="studentSubmitBtn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 shadow-2xl transition-all text-center">Authorize Admission</button>
                 </div>
             </form>
         </div>
@@ -530,7 +539,7 @@
             const sId = document.getElementById('feeStudentSelect').value;
             const type = document.getElementById('feeType')?.value || 'Monthly';
             const amountInput = document.getElementById('feeAmount');
-            if (!sId || !amountInput) return;
+            if (!sId || !amountInput || document.getElementById('editTransId').value) return;
             const student = appState.students.find(s => s.id == sId);
             if (!student) return;
             if (type === 'Monthly') { amountInput.value = student.mlyFee || 0; } else if (type === 'Admission') { amountInput.value = student.admFee || 0; }
@@ -620,7 +629,7 @@
                 const admissionsCount = appState.students.filter(s => { if (!s.date) return false; const [y, m, d] = s.date.split('-').map(Number); return (m - 1) === targetMoIdx && y === target.y; }).length;
                 const actualRev = appState.transactions.filter(t => { if (!t.paidDate) return false; const [y, m, d] = t.paidDate.split('-').map(Number); return (m - 1) === targetMoIdx && y === target.y; }).reduce((a, b) => a + (Number(b.amount) || 0), 0);
                 const status = activeStudents.length >= target.t ? '✅ Met' : '🚀 Target';
-                return `<tr class="border-b border-gray-50 ${targetMoIdx === currMoIdx && target.y === currYr ? 'bg-blue-50/50' : ''} text-center"><td class="py-4 font-black text-left">${target.m} ${target.y}</td><td class="py-4 text-gray-500">${target.t} Students</td><td class="py-4 font-black">${admissionsCount}</td><td class="py-4 font-black text-green-600">₹${actualRev.toLocaleString()}</td><td class="py-4 text-right"><span class="px-2 py-1 rounded-full text-[10px] font-black ${activeStudents.length >= target.t ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">${status}</span></td></tr>`;
+                return `<tr class="border-b border-gray-50 ${targetMoIdx === currMoIdx && target.y === currYr ? 'bg-blue-50/50' : ''} text-center"><td class="py-4 font-black text-left">${target.m} ${target.y}</td><td class="py-4 text-gray-500">${target.t} Students</td><td class="py-4 font-black text-center">${admissionsCount}</td><td class="py-4 font-black text-green-600 text-center">₹${actualRev.toLocaleString()}</td><td class="py-4 text-right"><span class="px-2 py-1 rounded-full text-[10px] font-black ${activeStudents.length >= target.t ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">${status}</span></td></tr>`;
             }).join(''));
 
             const courseMap = {};
@@ -633,11 +642,11 @@
             safeSetHTML('referralList', Object.entries(refMap).map(([src, count]) => `<div class="bg-indigo-50 p-6 rounded-2xl flex justify-between items-center"><div><p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Source</p><p class="text-sm font-black text-indigo-900">${src}</p></div><span class="bg-white px-3 py-1 rounded-full text-xs font-black text-indigo-600 shadow-sm">${count}</span></div>`).join('') || '<p class="text-xs text-gray-400 italic">No referral data.</p>');
 
             const allHistory = [...appState.transactions.map(t => ({ ...t, kind: 'fee' })), ...appState.expenses.map(e => ({ ...e, kind: 'exp', paidDate: e.date, studentName: e.name }))].sort((a,b) => new Date(b.paidDate) - new Date(a.paidDate));
-            safeSetHTML('transactionList', allHistory.slice(0, 30).map(item => `<div class="flex justify-between items-center p-5 rounded-3xl border ${item.kind === 'fee' ? 'bg-green-50/30 border-green-100' : 'bg-red-50/30 border-red-100'}"><div class="flex-1"><p class="font-black text-slate-800 text-sm">${item.studentName}</p><p class="text-[9px] text-gray-400 font-black uppercase tracking-widest">${item.paidDate} • ${item.kind === 'fee' ? 'FEE COLLECTION' : 'EXPENSE'}</p></div><div class="flex items-center gap-4"><p class="font-black text-sm ${item.kind === 'fee' ? 'text-green-600' : 'text-red-600'}">${item.kind === 'fee' ? '+' : '-'}₹${item.amount}</p><button onclick="window.deleteEntry('${item.id}', '${item.kind}')" class="text-gray-300 hover:text-red-500 transition-colors p-2"><i class="fas fa-trash-alt"></i></button></div></div>`).join(''));
+            safeSetHTML('transactionList', allHistory.slice(0, 30).map(item => `<div class="flex justify-between items-center p-5 rounded-3xl border ${item.kind === 'fee' ? 'bg-green-50/30 border-green-100' : 'bg-red-50/30 border-red-100'}"><div class="flex-1"><p class="font-black text-slate-800 text-sm">${item.studentName}</p><p class="text-[9px] text-gray-400 font-black uppercase tracking-widest">${item.paidDate} • ${item.kind === 'fee' ? 'FEE COLLECTION' : 'EXPENSE'}</p></div><div class="flex items-center gap-4"><p class="font-black text-sm ${item.kind === 'fee' ? 'text-green-600' : 'text-red-600'}">${item.kind === 'fee' ? '+' : '-'}₹${item.amount}</p><div class="flex gap-1"><button onclick="window.editEntry('${item.id}', '${item.kind}')" class="text-gray-300 hover:text-blue-500 transition-colors p-2"><i class="fas fa-edit"></i></button><button onclick="window.deleteEntry('${item.id}', '${item.kind}')" class="text-gray-300 hover:text-red-500 transition-colors p-2"><i class="fas fa-trash-alt"></i></button></div></div></div>`).join(''));
 
             safeSetHTML('studentTableBody', appState.students.map(s => {
                 const isOverdue = new Date(s.nextDueDate) < today && s.status === 'Active';
-                return `<tr class="border-b hover:bg-gray-50/50 transition-all text-sm"><td class="p-6"><p class="font-black text-slate-800">${s.name}</p><p class="text-[10px] text-gray-400 font-bold">${s.phone || 'No Phone'}</p></td><td class="p-6 text-xs font-bold max-w-[120px] truncate">${s.course}</td><td class="p-6 font-black text-blue-600 text-center">₹${s.mlyFee}</td><td class="p-6 text-center"><span class="px-3 py-1 rounded-lg font-black text-[10px] ${isOverdue ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${s.nextDueDate}</span></td><td class="p-6 text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">${s.status}</span></td><td class="p-6 flex gap-2 justify-end"><button onclick="window.updateStatus('${s.id}', '${s.status === 'Active' ? 'Stopped' : 'Active'}')" class="text-gray-400 hover:text-blue-600 p-2"><i class="fas ${s.status === 'Active' ? 'fa-stop-circle' : 'fa-play-circle'}"></i></button><button onclick="window.deleteStudent('${s.id}')" class="text-gray-300 hover:text-red-500 p-2"><i class="fas fa-trash"></i></button></td></tr>`;
+                return `<tr class="border-b hover:bg-gray-50/50 transition-all text-sm"><td class="p-6"><p class="font-black text-slate-800">${s.name}</p><p class="text-[10px] text-gray-400 font-bold">${s.phone || 'No Phone'}</p></td><td class="p-6 text-xs font-bold max-w-[120px] truncate text-center">${s.course}</td><td class="p-6 font-black text-blue-600 text-center">₹${s.mlyFee}</td><td class="p-6 text-center"><span class="px-3 py-1 rounded-lg font-black text-[10px] ${isOverdue ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${s.nextDueDate}</span></td><td class="p-6 text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">${s.status}</span></td><td class="p-6 flex gap-2 justify-end"><button onclick="window.editStudent('${s.id}')" class="text-gray-400 hover:text-blue-600 p-2"><i class="fas fa-edit"></i></button><button onclick="window.updateStatus('${s.id}', '${s.status === 'Active' ? 'Stopped' : 'Active'}')" class="text-gray-400 hover:text-blue-600 p-2"><i class="fas ${s.status === 'Active' ? 'fa-stop-circle' : 'fa-play-circle'}"></i></button><button onclick="window.deleteStudent('${s.id}')" class="text-gray-300 hover:text-red-500 p-2"><i class="fas fa-trash"></i></button></td></tr>`;
             }).join(''));
 
             safeSetHTML('feeStudentSelect', '<option value="">Choose Student...</option>' + activeStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join(''));
@@ -657,29 +666,132 @@
             showNotif("Phone numbers copied!");
         };
 
+        // Modal Helpers for Edit
+        window.editStudent = (id) => {
+            const s = appState.students.find(stu => stu.id === id);
+            if (!s) return;
+            document.getElementById('editStudentId').value = id;
+            document.getElementById('stuName').value = s.name;
+            document.getElementById('stuCourse').value = s.course;
+            document.getElementById('stuAdmFee').value = s.admFee;
+            document.getElementById('stuMlyFee').value = s.mlyFee;
+            document.getElementById('stuReferral').value = s.referral || '';
+            document.getElementById('stuPhone').value = s.phone || '';
+            document.getElementById('stuDate').value = s.date;
+            document.getElementById('stuDueDate').value = s.nextDueDate;
+            
+            document.getElementById('studentModalTitle').innerText = "Edit Student Details";
+            document.getElementById('studentSubmitBtn').innerText = "Update Record";
+            openModal('studentModal');
+        };
+
+        window.editEntry = (id, kind) => {
+            if (kind === 'exp') {
+                const e = appState.expenses.find(item => item.id === id);
+                if (!e) return;
+                // For simplicity, we just use the current form and set its values
+                document.getElementById('expName').value = e.name;
+                document.getElementById('expAmount').value = e.amount;
+                document.getElementById('expDate').value = e.date;
+                showNotif("Details loaded into form. Modify and re-submit (Original record will remain).");
+                return;
+            }
+            const t = appState.transactions.find(item => item.id === id);
+            if (!t) return;
+            
+            document.getElementById('editTransId').value = id;
+            document.getElementById('feeAmount').value = t.amount;
+            document.getElementById('feeType').value = t.type;
+            document.getElementById('feeDate').value = t.paidDate;
+            
+            document.getElementById('feeFormTitle').innerText = "Edit Fee Receipt";
+            document.getElementById('feeSubmitBtn').innerText = "Update Receipt";
+            
+            document.getElementById('studentSelectContainer').classList.add('hidden');
+            document.getElementById('studentNameDisplay').classList.remove('hidden');
+            document.getElementById('editStudentName').innerText = t.studentName;
+            document.getElementById('cancelFeeEditBtn').classList.remove('hidden');
+        };
+
+        window.resetFeeForm = () => {
+            document.getElementById('editTransId').value = '';
+            document.getElementById('feeForm').reset();
+            document.getElementById('feeFormTitle').innerText = "Collect Fee";
+            document.getElementById('feeSubmitBtn').innerText = "Submit Receipt";
+            document.getElementById('studentSelectContainer').classList.remove('hidden');
+            document.getElementById('studentNameDisplay').classList.add('hidden');
+            document.getElementById('cancelFeeEditBtn').classList.add('hidden');
+            document.getElementById('feeDate').value = new Date().toISOString().split('T')[0];
+        };
+
+        // Form Handlers
         document.getElementById('enrollmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('stuName').value;
-            const admFee = Number(document.getElementById('stuAdmFee').value);
-            const joiningDate = document.getElementById('stuDate').value;
-            const student = { name, course: document.getElementById('stuCourse').value, admFee, mlyFee: Number(document.getElementById('stuMlyFee').value), date: joiningDate, nextDueDate: document.getElementById('stuDueDate').value, status: 'Active', totalPaid: admFee, referral: document.getElementById('stuReferral').value, phone: document.getElementById('stuPhone').value, createdAt: new Date().toISOString() };
+            const id = document.getElementById('editStudentId').value;
+            const data = {
+                name: document.getElementById('stuName').value,
+                course: document.getElementById('stuCourse').value,
+                admFee: Number(document.getElementById('stuAdmFee').value),
+                mlyFee: Number(document.getElementById('stuMlyFee').value),
+                referral: document.getElementById('stuReferral').value,
+                phone: document.getElementById('stuPhone').value,
+                date: document.getElementById('stuDate').value,
+                nextDueDate: document.getElementById('stuDueDate').value
+            };
+
             try {
-                const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), student);
-                if (admFee > 0) await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: docRef.id, studentName: name, amount: admFee, type: 'Admission', paidDate: joiningDate, cycleDueDate: 'Joining Day' });
-                showNotif('Authorized & Enrolled!'); closeModal('studentModal'); e.target.reset();
-            } catch (err) { showNotif("Error during enrollment"); }
+                if (id) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id), data);
+                    showNotif("Student Record Updated!");
+                } else {
+                    const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), { ...data, status: 'Active', totalPaid: data.admFee, createdAt: new Date().toISOString() });
+                    if (data.admFee > 0) await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: docRef.id, studentName: data.name, amount: data.admFee, type: 'Admission', paidDate: data.date, cycleDueDate: 'Joining Day' });
+                    showNotif('Authorized & Enrolled!');
+                }
+                closeModal('studentModal');
+                e.target.reset();
+                document.getElementById('editStudentId').value = '';
+                document.getElementById('studentModalTitle').innerText = "Admission Registry";
+                document.getElementById('studentSubmitBtn').innerText = "Authorize Admission";
+            } catch (err) { showNotif("Error during save"); }
         });
 
         document.getElementById('feeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const sId = document.getElementById('feeStudentSelect').value;
-            const student = appState.students.find(s => s.id == sId);
-            const paidDate = document.getElementById('feeDate').value;
+            const editId = document.getElementById('editTransId').value;
             const amount = Number(document.getElementById('feeAmount').value);
-            const nextDueObj = new Date(paidDate); nextDueObj.setDate(nextDueObj.getDate() + 30);
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: sId, studentName: student.name, amount, type: document.getElementById('feeType').value, paidDate, cycleDueDate: student.nextDueDate });
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', sId), { nextDueDate: nextDueObj.toISOString().split('T')[0], totalPaid: (student.totalPaid || 0) + amount });
-            showNotif('Receipt Synced!'); e.target.reset();
+            const type = document.getElementById('feeType').value;
+            const paidDate = document.getElementById('feeDate').value;
+
+            try {
+                if (editId) {
+                    const tRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', editId);
+                    const tSnap = await getDoc(tRef);
+                    if (tSnap.exists()) {
+                        const oldData = tSnap.data();
+                        const diff = amount - oldData.amount;
+                        
+                        // Update student total
+                        if (oldData.studentId && diff !== 0) {
+                            const sRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', oldData.studentId);
+                            const sSnap = await getDoc(sRef);
+                            if (sSnap.exists()) {
+                                await updateDoc(sRef, { totalPaid: (sSnap.data().totalPaid || 0) + diff });
+                            }
+                        }
+                        await updateDoc(tRef, { amount, type, paidDate });
+                        showNotif("Receipt Updated & Balanced!");
+                    }
+                } else {
+                    const sId = document.getElementById('feeStudentSelect').value;
+                    const student = appState.students.find(s => s.id == sId);
+                    const nextDueObj = new Date(paidDate); nextDueObj.setDate(nextDueObj.getDate() + 30);
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: sId, studentName: student.name, amount, type, paidDate, cycleDueDate: student.nextDueDate });
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', sId), { nextDueDate: nextDueObj.toISOString().split('T')[0], totalPaid: (student.totalPaid || 0) + amount });
+                    showNotif('Receipt Synced!');
+                }
+                resetFeeForm();
+            } catch (err) { showNotif("Error saving payment"); }
         });
 
         document.getElementById('expenseForm').addEventListener('submit', async (e) => {
