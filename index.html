@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Future U - Growth & Management ERP</title>
+    <title>Future U - 2-Year Growth ERP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
         .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .sidebar-item.active { background-color: #3b82f6; color: white; }
+        .sidebar-item.active { background-color: #3b82f6; color: white; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .status-badge-active { background-color: #dcfce7; color: #166534; }
         .status-badge-stopped { background-color: #fee2e2; color: #991b1b; }
         .status-badge-overdue { background-color: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
         #loadingOverlay { transition: opacity 0.5s ease-out; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -24,25 +27,23 @@
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white z-[300] flex flex-col items-center justify-center">
         <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-gray-500 font-medium">Connecting to Future U Cloud...</p>
+        <p class="text-gray-500 font-medium text-sm tracking-wider uppercase">Loading Future U Ecosystem...</p>
     </div>
 
     <!-- PIN Lock Overlay -->
     <div id="pinOverlay" class="fixed inset-0 bg-slate-900/95 z-[250] hidden flex-col items-center justify-center p-6 backdrop-blur-md">
         <div class="w-full max-w-xs text-center">
             <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl mb-6 mx-auto shadow-xl">
-                <i class="fas fa-lock"></i>
+                <i class="fas fa-shield-halved"></i>
             </div>
-            <h3 class="text-white text-xl font-bold mb-2">Owner Access Required</h3>
-            <p class="text-slate-400 text-sm mb-8">Please enter your 4-digit PIN to view sensitive financial data.</p>
-            
+            <h3 class="text-white text-xl font-bold mb-2">Secure Owner Area</h3>
+            <p class="text-slate-400 text-sm mb-8">Enter PIN to access Financials & Analytics.</p>
             <div class="flex justify-center gap-3 mb-8">
-                <div id="pin-1" class="w-4 h-4 rounded-full border-2 border-slate-600"></div>
-                <div id="pin-2" class="w-4 h-4 rounded-full border-2 border-slate-600"></div>
-                <div id="pin-3" class="w-4 h-4 rounded-full border-2 border-slate-600"></div>
-                <div id="pin-4" class="w-4 h-4 rounded-full border-2 border-slate-600"></div>
+                <div id="pin-1" class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all"></div>
+                <div id="pin-2" class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all"></div>
+                <div id="pin-3" class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all"></div>
+                <div id="pin-4" class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all"></div>
             </div>
-
             <div class="grid grid-cols-3 gap-4">
                 <button onclick="pressPin('1')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all">1</button>
                 <button onclick="pressPin('2')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all">2</button>
@@ -53,242 +54,152 @@
                 <button onclick="pressPin('7')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all">7</button>
                 <button onclick="pressPin('8')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all">8</button>
                 <button onclick="pressPin('9')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all">9</button>
-                <button onclick="clearPin()" class="h-14 bg-red-900/30 text-red-500 rounded-xl text-sm font-bold hover:bg-red-900/50">CLR</button>
-                <button onclick="pressPin('0')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all">0</button>
-                <button onclick="cancelPin()" class="h-14 bg-slate-800 text-slate-400 rounded-xl text-sm font-bold hover:bg-slate-700">ESC</button>
+                <button onclick="clearPin()" class="h-14 bg-red-900/30 text-red-500 rounded-xl text-xs font-bold">CLR</button>
+                <button onclick="pressPin('0')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 transition-all">0</button>
+                <button onclick="cancelPin()" class="h-14 bg-slate-800 text-slate-400 rounded-xl text-xs font-bold">ESC</button>
             </div>
         </div>
     </div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50">
-        <div class="p-6">
-            <h1 class="text-2xl font-bold text-blue-600 flex items-center gap-2">
-                <i class="fas fa-graduation-cap"></i> Future U
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-2xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 overflow-y-auto">
+        <div class="p-6 border-b border-gray-50">
+            <h1 class="text-2xl font-black text-blue-600 flex items-center gap-2">
+                <i class="fas fa-graduation-cap"></i> FUTURE U
             </h1>
-            <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-bold">Cloud ERP Manager</p>
+            <p class="text-[9px] text-gray-400 mt-1 uppercase tracking-[0.2em] font-extrabold">Vision 2027 Dashboard</p>
         </div>
-        <nav class="mt-6 px-4 space-y-2">
+        <nav class="mt-4 px-4 space-y-1">
             <button onclick="showTab('dashboard')" class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
-                <i class="fas fa-chart-line"></i> Dashboard
+                <i class="fas fa-chart-pie w-5"></i> <span class="font-semibold text-sm">Dashboard</span>
             </button>
             <button onclick="showTab('students')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
-                <i class="fas fa-users"></i> Student Database
+                <i class="fas fa-user-graduate w-5"></i> <span class="font-semibold text-sm">Students</span>
             </button>
             <button onclick="showTab('fees')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
-                <i class="fas fa-hand-holding-dollar"></i> Fee & Expenses
+                <i class="fas fa-hand-holding-dollar w-5"></i> <span class="font-semibold text-sm">Ledger</span>
             </button>
+            <div class="pt-4 pb-2"><p class="text-[10px] text-gray-400 font-black uppercase tracking-widest px-4">Insights</p></div>
             <button onclick="showTab('reports')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
-                <i class="fas fa-file-invoice"></i> Detailed Reports <i class="fas fa-lock ml-auto text-[10px] opacity-30"></i>
+                <i class="fas fa-file-invoice-dollar w-5"></i> <span class="font-semibold text-sm">Detailed Reports</span> <i class="fas fa-lock ml-auto text-[10px] opacity-20"></i>
             </button>
             <button onclick="showTab('growth')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
-                <i class="fas fa-bullseye"></i> Growth Scoreboard <i class="fas fa-lock ml-auto text-[10px] opacity-30"></i>
+                <i class="fas fa-arrow-trend-up w-5"></i> <span class="font-semibold text-sm">Growth Board</span> <i class="fas fa-lock ml-auto text-[10px] opacity-20"></i>
             </button>
             <button onclick="showTab('financials')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
-                <i class="fas fa-building-columns"></i> Financial Plan <i class="fas fa-lock ml-auto text-[10px] opacity-30"></i>
+                <i class="fas fa-vault w-5"></i> <span class="font-semibold text-sm">Financial Vault</span> <i class="fas fa-lock ml-auto text-[10px] opacity-20"></i>
             </button>
         </nav>
         <div class="absolute bottom-6 left-6 right-6">
-            <div class="bg-blue-50 rounded-xl p-4">
-                <p class="text-sm font-semibold text-blue-800">Growth Scoreboard</p>
-                <div class="w-full bg-blue-200 rounded-full h-2 mt-2">
-                    <div id="targetProgress" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-4 text-white shadow-lg">
+                <p class="text-[10px] font-bold uppercase opacity-80 text-center tracking-widest">Vision 2027</p>
+                <p id="visionProgressText" class="text-xl font-black mt-1 text-center">0 / 500</p>
+                <div class="w-full bg-white/20 rounded-full h-1.5 mt-3">
+                    <div id="visionBar" class="bg-white h-1.5 rounded-full" style="width: 0%"></div>
                 </div>
-                <p id="targetText" class="text-xs mt-2 text-blue-600 font-medium">Syncing...</p>
             </div>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="md:ml-64 p-4 md:p-8">
-        <header class="flex justify-between items-center mb-8">
-            <button class="md:hidden text-2xl" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-            <h2 id="pageTitle" class="text-2xl font-bold text-gray-800">Dashboard</h2>
+    <main class="lg:ml-64 p-4 lg:p-10">
+        <header class="flex justify-between items-center mb-10">
+            <button class="lg:hidden text-2xl p-2 bg-white rounded-xl shadow-sm" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div>
+                <h2 id="pageTitle" class="text-3xl font-black tracking-tight text-slate-800">Dashboard</h2>
+                <p id="currentDate" class="text-sm font-semibold text-gray-400 mt-1"></p>
+            </div>
             <div class="flex items-center gap-4">
-                <div class="text-right hidden sm:block">
-                    <p id="currentDate" class="text-sm text-gray-500 font-medium"></p>
-                    <p id="cloudStatus" class="text-[10px] text-green-500 font-bold uppercase tracking-widest">● Cloud Connected</p>
+                <div class="hidden sm:flex flex-col items-end">
+                    <span id="cloudStatus" class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold uppercase tracking-widest flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Cloud Active
+                    </span>
                 </div>
-                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">FU</div>
+                <div class="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center border border-gray-100 font-black text-blue-600">FU</div>
             </div>
         </header>
 
-        <!-- DASHBOARD TAB -->
-        <div id="dashboard" class="tab-content active space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="glass-card p-6 rounded-2xl shadow-sm">
-                    <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Active Students</h3>
-                    <p id="statActive" class="text-3xl font-bold">0</p>
-                    <span id="targetSubtext" class="text-xs text-blue-500 font-semibold uppercase tracking-wider">Goal: 100</span>
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="tab-content active space-y-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+                <div class="glass-card p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border-b-4 border-blue-500">
+                    <h3 class="text-gray-400 font-bold text-xs uppercase tracking-widest">Active Enrollment</h3>
+                    <p id="statActive" class="text-4xl font-black mt-2">0</p>
+                    <span id="targetSubtext" class="text-xs text-blue-500 font-bold mt-2 inline-block">Goal: 500 Students</span>
                 </div>
-                <div class="glass-card p-6 rounded-2xl shadow-sm border-l-4 border-red-500">
-                    <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Overdue Fees</h3>
-                    <p id="statOverdue" class="text-3xl font-bold text-red-600">0</p>
-                    <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Follow-up Priority</span>
+                <div class="glass-card p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border-b-4 border-red-500">
+                    <h3 class="text-gray-400 font-bold text-xs uppercase tracking-widest">Dues Pending</h3>
+                    <p id="statOverdue" class="text-4xl font-black mt-2 text-red-600">0</p>
+                    <span class="text-xs text-red-400 font-bold mt-2 inline-block">Daily Follow-up Target</span>
                 </div>
-                <div class="glass-card p-6 rounded-2xl shadow-sm">
-                    <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Monthly Profit</h3>
-                    <p id="statProfit" class="text-3xl font-bold text-green-600">₹0</p>
-                    <div class="flex justify-between text-[10px] font-bold mt-1">
+                <div class="glass-card p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border-b-4 border-green-500">
+                    <h3 class="text-gray-400 font-bold text-xs uppercase tracking-widest">Monthly Net Profit</h3>
+                    <p id="statProfit" class="text-4xl font-black mt-2 text-green-600">₹0</p>
+                    <div class="flex justify-between text-[10px] font-bold mt-3 bg-gray-50 p-2 rounded-lg text-center">
                         <span class="text-blue-500" id="statMonthlyRev">Rev: ₹0</span>
+                        <span class="text-red-500 mx-2">|</span>
                         <span class="text-red-500" id="statMonthlyExp">Exp: ₹0</span>
                     </div>
                 </div>
-                <div class="glass-card p-6 rounded-2xl shadow-sm">
-                    <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Total Collected</h3>
-                    <p id="statRevenue" class="text-3xl font-bold">₹0</p>
-                    <span class="text-xs text-indigo-400 font-semibold uppercase tracking-wider">All-Time Income</span>
+                <div class="glass-card p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border-b-4 border-indigo-500">
+                    <h3 class="text-gray-400 font-bold text-xs uppercase tracking-widest">All-Time Revenue</h3>
+                    <p id="statRevenue" class="text-4xl font-black mt-2">₹0</p>
+                    <span class="text-xs text-indigo-400 font-bold mt-2 inline-block">Vision 2027 Valuation</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h4 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-phone-alt text-blue-500"></i> Rural Follow-up List</h4>
-                    <div id="followUpList" class="space-y-3">
-                        <p class="text-sm text-gray-400 italic">Syncing active dues...</p>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <div class="xl:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="font-black text-lg flex items-center gap-3"><i class="fas fa-bullhorn text-blue-500"></i> Marketing Phase Logic</h4>
+                        <span class="text-[10px] font-black bg-blue-100 text-blue-600 px-3 py-1 rounded-full uppercase" id="currentPhaseBadge">Phase 1</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-4">
+                            <p id="currentPhaseTitle" class="text-xl font-extrabold text-slate-800"></p>
+                            <p id="currentPhaseDesc" class="text-sm text-gray-500 leading-relaxed"></p>
+                            <button onclick="showTab('growth')" class="text-blue-600 text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">View Roadmap <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                        <div id="phaseChecklist" class="space-y-3 bg-gray-50 p-6 rounded-2xl">
+                            <!-- JS Driven -->
+                        </div>
                     </div>
                 </div>
-                <div class="bg-slate-900 p-8 rounded-2xl text-white shadow-xl relative overflow-hidden">
+                <div class="bg-slate-900 p-8 rounded-[2rem] text-white shadow-2xl relative overflow-hidden flex flex-col justify-between">
                     <div class="relative z-10">
-                        <h3 class="text-xl font-bold mb-4">Strategic Allocation</h3>
-                        <div id="miniAlloc" class="space-y-3"></div>
+                        <h3 class="text-xl font-black mb-6">Money Allocation (20%)</h3>
+                        <div id="miniAlloc" class="space-y-4"></div>
                     </div>
-                    <div class="absolute -right-10 -bottom-10 opacity-10 text-8xl"><i class="fas fa-chart-pie"></i></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- DETAILED REPORTS TAB -->
-        <div id="reports" class="tab-content space-y-6">
-            <div class="flex justify-between items-center flex-wrap gap-4">
-                <h3 class="text-xl font-bold">Advanced Institute Overview</h3>
-                <div class="flex gap-2 bg-white p-1 rounded-xl shadow-sm border">
-                    <select id="reportYear" class="p-2 text-sm border-none outline-none font-bold" onchange="updateUI()"></select>
-                    <select id="reportMonth" class="p-2 text-sm border-none outline-none font-bold" onchange="updateUI()">
-                        <option value="all">All-Time View</option>
-                        <option value="0">January</option><option value="1">February</option><option value="2">March</option>
-                        <option value="3">April</option><option value="4">May</option><option value="5">June</option>
-                        <option value="6">July</option><option value="7">August</option><option value="8">September</option>
-                        <option value="9">October</option><option value="10">November</option><option value="11">December</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Summary Metrics -->
-                <div class="lg:col-span-1 space-y-6">
-                    <div class="glass-card p-6 rounded-2xl shadow-sm border-l-4 border-blue-600">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Selected Period Revenue</p>
-                        <p id="repTotalRev" class="text-3xl font-black mt-1">₹0</p>
-                        <div class="mt-4 pt-4 border-t space-y-2">
-                            <div class="flex justify-between text-xs"><span class="text-gray-500">Admissions:</span><span id="repAdmFee" class="font-bold">₹0</span></div>
-                            <div class="flex justify-between text-xs"><span class="text-gray-500">Monthly Fees:</span><span id="repMlyFee" class="font-bold">₹0</span></div>
-                            <div class="flex justify-between text-xs"><span class="text-gray-500">Bulk Advance:</span><span id="repAdvFee" class="font-bold">₹0</span></div>
-                        </div>
-                    </div>
-                    <div class="glass-card p-6 rounded-2xl shadow-sm border-l-4 border-red-600">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Operational Expenses</p>
-                        <p id="repTotalExp" class="text-3xl font-black mt-1 text-red-600">₹0</p>
-                        <p class="text-[10px] text-gray-400 mt-2">Calculated from logged business costs.</p>
-                    </div>
-                </div>
-
-                <!-- Course Popularity & Revenue -->
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="glass-card p-6 rounded-2xl shadow-sm h-full">
-                        <h4 class="font-bold mb-6 flex items-center gap-2"><i class="fas fa-trophy text-yellow-500"></i> Course Revenue Breakdown</h4>
-                        <div id="courseRevenueList" class="space-y-4">
-                            <!-- JS Driven -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- GROWTH SCOREBOARD TAB -->
-        <div id="growth" class="tab-content space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Weekly Tracker Sheet -->
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="glass-card p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-calendar-check text-blue-600"></i> Marketing Non-Negotiables</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="space-y-4">
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Daily Actions</p>
-                                <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors">
-                                    <input type="checkbox" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500" onchange="toggleTask('followup')">
-                                    <span class="text-sm">5 Follow-up calls/day</span>
-                                </label>
-                                <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors">
-                                    <input type="checkbox" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500" onchange="toggleTask('whatsapp')">
-                                    <span class="text-sm">WhatsApp Broadcast sent</span>
-                                </label>
-                            </div>
-                            <div class="space-y-4">
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Weekly Actions</p>
-                                <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors">
-                                    <input type="checkbox" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500" onchange="toggleTask('social')">
-                                    <span class="text-sm">3 Social Posts/week</span>
-                                </label>
-                                <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors">
-                                    <input type="checkbox" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500" onchange="toggleTask('improve')">
-                                    <span class="text-sm">1 Operational Improvement</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="glass-card p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="font-bold mb-4">Monthly Performance Targets</h4>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm">
-                                <thead>
-                                    <tr class="text-gray-400 uppercase text-[10px] tracking-widest font-bold border-b">
-                                        <th class="pb-4">Month</th>
-                                        <th class="pb-4">Target Students</th>
-                                        <th class="pb-4">New Admissions</th>
-                                        <th class="pb-4">Actual Revenue</th>
-                                        <th class="pb-4">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="performanceBody">
-                                    <!-- Targets vs Actuals -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <!-- Marketing Phase Card -->
-                <div class="space-y-6">
-                    <div class="bg-blue-600 text-white p-8 rounded-3xl shadow-xl">
-                        <h3 id="currentPhaseTitle" class="text-xl font-bold mb-2">Phase 1: Foundation</h3>
-                        <p id="currentPhaseDesc" class="text-sm opacity-80 mb-6">Focus on testimonials and local posters.</p>
-                        <div class="space-y-4" id="phaseChecklist">
-                            <!-- JS Driven -->
-                        </div>
-                    </div>
+                    <p class="text-[10px] opacity-40 font-bold mt-6 uppercase tracking-widest">Automated Strategy Engine</p>
+                    <div class="absolute -right-16 -bottom-16 opacity-10 text-[12rem] rotate-12"><i class="fas fa-piggy-bank"></i></div>
                 </div>
             </div>
         </div>
 
         <!-- STUDENTS TAB -->
         <div id="students" class="tab-content space-y-6">
-            <div class="flex justify-between items-center">
-                <h3 class="text-xl font-bold">Student Database</h3>
-                <button onclick="openModal('studentModal')" class="bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 font-semibold shadow-lg transition-all">
-                    <i class="fas fa-user-plus mr-2"></i>New Admission
-                </button>
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <h3 class="text-xl font-black">Student Database</h3>
+                <div class="flex gap-2">
+                    <button onclick="copyNumbers()" class="bg-slate-100 text-slate-700 px-5 py-3 rounded-xl hover:bg-slate-200 font-bold text-xs flex items-center gap-2">
+                        <i class="fas fa-copy"></i> Copy Numbers
+                    </button>
+                    <button onclick="openModal('studentModal')" class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 font-black shadow-xl transition-all flex items-center gap-2">
+                        <i class="fas fa-plus"></i> New Admission
+                    </button>
+                </div>
             </div>
-            <div class="glass-card rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+            <div class="glass-card rounded-[2rem] overflow-hidden shadow-sm border border-gray-100">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead class="bg-gray-50 border-b">
                             <tr>
-                                <th class="p-4 font-semibold text-gray-600">Student</th>
-                                <th class="p-4 font-semibold text-gray-600">Course</th>
-                                <th class="p-4 font-semibold text-gray-600">Monthly Fee</th>
-                                <th class="p-4 font-semibold text-gray-600">Next Due Date</th>
-                                <th class="p-4 font-semibold text-gray-600">Status</th>
-                                <th class="p-4 font-semibold text-gray-600">Actions</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest">Student</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest">Course</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-center">Monthly Fee</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-center">Due Date</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-center">Status</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="studentTableBody"></tbody>
@@ -299,23 +210,23 @@
 
         <!-- FEES & EXPENSES TAB -->
         <div id="fees" class="tab-content space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-1 space-y-6">
-                    <div class="glass-card p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="font-bold mb-4 text-blue-600 flex items-center gap-2"><i class="fas fa-coins"></i> Collect Fee</h4>
-                        <form id="feeForm" class="space-y-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 space-y-8">
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                        <h4 class="font-black text-lg mb-6 text-blue-600 flex items-center gap-2"><i class="fas fa-wallet"></i> Collect Fee</h4>
+                        <form id="feeForm" class="space-y-5">
                             <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase">Student</label>
-                                <select id="feeStudentSelect" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none" required></select>
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Student</label>
+                                <select id="feeStudentSelect" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm" required></select>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase">Amount (₹)</label>
-                                    <input type="number" id="feeAmount" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none" required>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Amount (₹)</label>
+                                    <input type="number" id="feeAmount" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm" required>
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase">Type</label>
-                                    <select id="feeType" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none">
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Type</label>
+                                    <select id="feeType" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm">
                                         <option value="Monthly">Monthly Fee</option>
                                         <option value="Admission">Admission Fee</option>
                                         <option value="Advance">Bulk Advance</option>
@@ -323,44 +234,151 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase">Paid Date</label>
-                                <input type="date" id="feeDate" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none" required>
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Paid Date</label>
+                                <input type="date" id="feeDate" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm" required>
                             </div>
-                            <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg transition-all">Record Payment</button>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 shadow-xl transition-all">Submit Receipt</button>
                         </form>
                     </div>
 
-                    <div class="glass-card p-6 rounded-2xl shadow-sm border border-red-100">
-                        <h4 class="font-bold mb-4 text-red-600 flex items-center gap-2"><i class="fas fa-shopping-cart"></i> Log Expense</h4>
-                        <form id="expenseForm" class="space-y-4">
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-red-100">
+                        <h4 class="font-black text-lg mb-6 text-red-600 flex items-center gap-2"><i class="fas fa-basket-shopping"></i> Expense Log</h4>
+                        <form id="expenseForm" class="space-y-5">
                             <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase">Expense Title</label>
-                                <input type="text" id="expName" placeholder="e.g. Rent, Marketing Posters" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none" required>
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Purpose</label>
+                                <input type="text" id="expName" placeholder="e.g. Rent, Marketing" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm" required>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase">Amount (₹)</label>
-                                    <input type="number" id="expAmount" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none" required>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Cost (₹)</label>
+                                    <input type="number" id="expAmount" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm" required>
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase">Date</label>
-                                    <input type="date" id="expDate" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none" required>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Date</label>
+                                    <input type="date" id="expDate" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm" required>
                                 </div>
                             </div>
-                            <button type="submit" class="w-full bg-red-500 text-white py-4 rounded-xl font-bold hover:bg-red-600 shadow-lg transition-all">Record Expense</button>
+                            <button type="submit" class="w-full bg-red-500 text-white py-5 rounded-2xl font-black hover:bg-red-600 shadow-xl transition-all">Record Payment</button>
                         </form>
                     </div>
                 </div>
                 <div class="lg:col-span-2">
-                    <div class="glass-card p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="font-bold">Transaction History</h4>
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-6">
+                            <h4 class="font-black text-lg">Transaction History</h4>
                             <div class="flex gap-2">
-                                <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded">Fees</span>
-                                <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded">Expenses</span>
+                                <span class="bg-green-100 text-green-700 text-[9px] font-extrabold px-3 py-1 rounded-full uppercase">Fees</span>
+                                <span class="bg-red-100 text-red-700 text-[9px] font-extrabold px-3 py-1 rounded-full uppercase">Expenses</span>
                             </div>
                         </div>
-                        <div id="transactionList" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
+                        <div id="transactionList" class="space-y-4 max-h-[700px] overflow-y-auto pr-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORTS TAB -->
+        <div id="reports" class="tab-content space-y-8">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <h3 class="text-xl font-black">Analytical Reports</h3>
+                <div class="flex gap-2 bg-white p-1 rounded-xl shadow-sm border">
+                    <select id="reportYear" class="p-2 text-sm border-none outline-none font-black" onchange="updateUI()"></select>
+                    <select id="reportMonth" class="p-2 text-sm border-none outline-none font-black" onchange="updateUI()">
+                        <option value="all">Full Year View</option>
+                        <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+                        <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+                        <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+                        <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 space-y-8">
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border-l-8 border-blue-600">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Period Revenue</p>
+                        <p id="repTotalRev" class="text-4xl font-black mt-2">₹0</p>
+                        <div class="mt-6 pt-6 border-t border-gray-50 space-y-3">
+                            <div class="flex justify-between text-xs font-bold"><span class="text-gray-500">Admissions:</span><span id="repAdmFee">₹0</span></div>
+                            <div class="flex justify-between text-xs font-bold"><span class="text-gray-500">Regular Fees:</span><span id="repMlyFee">₹0</span></div>
+                            <div class="flex justify-between text-xs font-bold"><span class="text-gray-500">Bulk Advance:</span><span id="repAdvFee">₹0</span></div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border-l-8 border-red-600">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Operational Costs</p>
+                        <p id="repTotalExp" class="text-4xl font-black mt-2 text-red-600">₹0</p>
+                        <p class="text-[10px] text-gray-400 mt-4 leading-relaxed font-semibold">Total reinvestment & essentials for selected range.</p>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm h-full">
+                        <h4 class="font-black text-lg mb-8 flex items-center gap-3"><i class="fas fa-medal text-yellow-500"></i> Performance by Course</h4>
+                        <div id="courseRevenueList" class="space-y-6"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                <h4 class="font-black text-lg mb-6"><i class="fas fa-users-viewfinder text-indigo-500"></i> Referral Sources</h4>
+                <div id="referralList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center"></div>
+            </div>
+        </div>
+
+        <!-- GROWTH BOARD -->
+        <div id="growth" class="tab-content space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                        <h4 class="font-black text-lg mb-8 flex items-center gap-3"><i class="fas fa-calendar-check text-blue-600"></i> Strategy Checklist</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Daily Non-Negotiables</p>
+                                <label class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100">
+                                    <input type="checkbox" class="w-6 h-6 rounded-lg text-blue-600 focus:ring-0 border-gray-200" onchange="toggleTask('followup')">
+                                    <span class="text-sm font-extrabold">5 Follow-up calls/day</span>
+                                </label>
+                                <label class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100">
+                                    <input type="checkbox" class="w-6 h-6 rounded-lg text-blue-600 focus:ring-0 border-gray-200" onchange="toggleTask('whatsapp')">
+                                    <span class="text-sm font-extrabold">WhatsApp Broadcast sent</span>
+                                </label>
+                            </div>
+                            <div class="space-y-4">
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Weekly Growth Actions</p>
+                                <label class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100">
+                                    <input type="checkbox" class="w-6 h-6 rounded-lg text-blue-600 focus:ring-0 border-gray-200" onchange="toggleTask('social')">
+                                    <span class="text-sm font-extrabold">3 Social Posts/week</span>
+                                </label>
+                                <label class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100">
+                                    <input type="checkbox" class="w-6 h-6 rounded-lg text-blue-600 focus:ring-0 border-gray-200" onchange="toggleTask('improve')">
+                                    <span class="text-sm font-extrabold">1 Business Improvement</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                        <h4 class="font-black text-lg mb-8">Vision 2026-2027 Targets</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="text-gray-400 uppercase text-[10px] tracking-widest font-black border-b">
+                                        <th class="pb-6">Milestone</th>
+                                        <th class="pb-6">Target</th>
+                                        <th class="pb-6">Current</th>
+                                        <th class="pb-6">Period Revenue</th>
+                                        <th class="pb-6 text-right">Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="performanceBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-8">
+                    <div class="bg-blue-600 text-white p-8 rounded-[2.5rem] shadow-2xl">
+                        <p class="text-[10px] font-black uppercase tracking-widest opacity-60" id="phaseIndicator">Phase 1</p>
+                        <h3 id="growthPhaseTitle" class="text-2xl font-black mt-2"></h3>
+                        <p id="growthPhaseDesc" class="text-sm opacity-80 mt-4 leading-relaxed font-medium"></p>
+                        <div class="mt-8 space-y-4" id="growthChecklist"></div>
                     </div>
                 </div>
             </div>
@@ -368,35 +386,30 @@
 
         <!-- FINANCIALS TAB -->
         <div id="financials" class="tab-content space-y-6">
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="glass-card p-8 rounded-3xl shadow-sm" id="allocationStats"></div>
-                <div class="flex flex-col gap-6">
-                    <!-- Security Settings -->
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-blue-100">
-                        <h4 class="font-bold text-lg mb-4 text-blue-600 flex items-center gap-2">
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="glass-card p-10 rounded-[2.5rem] shadow-sm" id="allocationStats"></div>
+                <div class="flex flex-col gap-8">
+                    <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-blue-100">
+                        <h4 class="font-black text-xl mb-6 text-blue-600 flex items-center gap-3">
                             <i class="fas fa-key"></i> Security Settings
                         </h4>
-                        <div class="space-y-4">
+                        <div class="space-y-5">
                             <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Update Owner PIN</label>
-                                <input type="password" id="newPin" maxlength="4" placeholder="Enter new 4-digit PIN" class="w-full p-4 border rounded-xl mt-1 outline-none focus:ring-2 focus:ring-blue-500">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Change Owner PIN</label>
+                                <input type="password" id="newPin" maxlength="4" placeholder="4-digit PIN" class="w-full p-5 bg-gray-50 border-none rounded-2xl mt-2 outline-none font-bold text-xl tracking-[1em] text-center">
                             </div>
-                            <button onclick="updatePin()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all">Update PIN</button>
+                            <button onclick="updatePin()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 shadow-xl transition-all">Save New Security PIN</button>
                         </div>
                     </div>
-                    
-                    <div class="bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
-                        <h4 class="font-bold text-lg mb-4 text-blue-400">Hard Rules for 2026</h4>
-                        <div class="space-y-4 text-sm opacity-90">
-                            <p class="flex items-start gap-3"><i class="fas fa-exclamation-triangle mt-1 text-yellow-400"></i> Rewards ONLY from Personal % bucket.</p>
-                            <p class="flex items-start gap-3"><i class="fas fa-exclamation-triangle mt-1 text-yellow-400"></i> If profit < target, Personal bucket = 0%.</p>
-                            <p class="flex items-start gap-3"><i class="fas fa-lock mt-1 text-red-400"></i> Jan-Mar: Heavy debt repayment, minimal personal spending.</p>
+                    <div class="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-2xl">
+                        <h4 class="font-black text-xl mb-6 text-blue-400">Strategic Debt Rules</h4>
+                        <div class="space-y-5 text-sm font-semibold opacity-90 leading-relaxed">
+                            <p class="flex items-start gap-4"><i class="fas fa-bolt text-yellow-400 mt-1"></i> Profits < Target = 0% Personal bucket.</p>
+                            <p class="flex items-start gap-4"><i class="fas fa-bolt text-yellow-400 mt-1"></i> Jan-Mar focus is maximum debt repayment.</p>
+                            <p class="flex items-start gap-4"><i class="fas fa-bolt text-yellow-400 mt-1"></i> Reward fund starts only after crossing 100 students.</p>
                         </div>
-                    </div>
-                    <div class="glass-card p-8 rounded-3xl shadow-sm text-center">
-                        <h4 class="font-bold mb-4">Backup & Maintenance</h4>
-                        <button onclick="exportBackup()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all">
-                            <i class="fas fa-download"></i> Download Data Backup
+                        <button onclick="exportBackup()" class="w-full bg-white/10 hover:bg-white/20 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 mt-10 transition-all">
+                            <i class="fas fa-cloud-arrow-down"></i> Local Data Backup
                         </button>
                     </div>
                 </div>
@@ -405,45 +418,51 @@
     </main>
 
     <!-- Admission Modal -->
-    <div id="studentModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[100] p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-2xl rounded-3xl p-8 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-800">New Enrollment</h3>
-                <button onclick="closeModal('studentModal')" class="text-gray-400 hover:text-black text-3xl">&times;</button>
-            </div>
-            <form id="enrollmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div id="studentModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[100] p-4 backdrop-blur-xl">
+        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
+            <button onclick="closeModal('studentModal')" class="absolute top-8 right-8 text-gray-400 hover:text-black text-3xl font-black transition-all">&times;</button>
+            <h3 class="text-3xl font-black text-slate-800 mb-8">Admission Registry</h3>
+            <form id="enrollmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="md:col-span-2">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Student Name</label>
-                    <input type="text" id="stuName" class="w-full p-4 border rounded-xl outline-none mt-1" required>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Student Name</label>
+                    <input type="text" id="stuName" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold" placeholder="Full name" required>
                 </div>
                 <div class="md:col-span-2">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Select Course</label>
-                    <select id="stuCourse" class="w-full p-4 border rounded-xl outline-none mt-1" required></select>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select Course</label>
+                    <select id="stuCourse" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold" required></select>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Adm. Fee (₹)</label>
-                    <input type="number" id="stuAdmFee" value="500" class="w-full p-4 border rounded-xl mt-1 outline-none" required>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Admission Fee (₹)</label>
+                    <input type="number" id="stuAdmFee" value="500" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold" required>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Monthly Fee (₹)</label>
-                    <input type="number" id="stuMlyFee" value="1000" class="w-full p-4 border rounded-xl mt-1 outline-none" required>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Monthly Fee (₹)</label>
+                    <input type="number" id="stuMlyFee" value="1000" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold" required>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Joining Date</label>
-                    <input type="date" id="stuDate" class="w-full p-4 border rounded-xl mt-1 outline-none" required>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Referral Link/Source</label>
+                    <input type="text" id="stuReferral" placeholder="e.g. Existing Student, Social" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">First Due Date</label>
-                    <input type="date" id="stuDueDate" class="w-full p-4 border rounded-xl mt-1 outline-none" required>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Contact Phone</label>
+                    <input type="text" id="stuPhone" placeholder="Mobile number" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold" required>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Joining Date</label>
+                    <input type="date" id="stuDate" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold" required>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cycle Reset Date</label>
+                    <input type="date" id="stuDueDate" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold" required>
                 </div>
                 <div class="md:col-span-2 pt-4">
-                    <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-xl transition-all">Enroll & Sync to Cloud</button>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 shadow-2xl transition-all">Authorize Admission</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="notif" class="fixed bottom-6 right-6 hidden bg-gray-900 text-white px-8 py-4 rounded-2xl shadow-2xl z-[200]">Action Successful!</div>
+    <div id="notif" class="fixed bottom-10 right-10 hidden bg-slate-900 text-white px-10 py-5 rounded-2xl shadow-2xl z-[200] font-bold">Action Successful!</div>
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -451,154 +470,65 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, addDoc, getDoc, collection, onSnapshot, query, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyB2bcDcHkL7mtu8Hy_XsrrCnJ1TRfzJNyc",
-            authDomain: "futureuerp.firebaseapp.com",
-            projectId: "futureuerp",
-            storageBucket: "futureuerp.firebasestorage.app",
-            messagingSenderId: "199842262718",
-            appId: "1:199842262718:web:553ca10bb5da77656478ef",
-            measurementId: "G-WHXM1VDGZY"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyB2bcDcHkL7mtu8Hy_XsrrCnJ1TRfzJNyc", authDomain: "futureuerp.firebaseapp.com", projectId: "futureuerp", storageBucket: "futureuerp.firebasestorage.app", messagingSenderId: "199842262718", appId: "1:199842262718:web:553ca10bb5da77656478ef", measurementId: "G-WHXM1VDGZY" };
 
         const COURSE_LIST = ["DIFA– Diploma in Indian and Foreign Accounting", "PDIFA– Professional Diploma in Indian & Foreign Accounting", "DFA– Diploma in Financial Accounting", "PGDCA– Post Graduate Diploma in Computer Application", "DCA–Diploma in Computer Application", "DOM–Diploma in Office Management", "Graphic Designing + Digital Marketing", "NIOS", "Vacation Course", "JAVA Programming", "PYTHON Programming", "HTML", "Zoho Books", "Tally Prime", "Adobe Photoshop", "Adobe PageMaker", "Adobe InDesign", "Microsoft Excel", "Microsoft Office Suite", "PSC Coaching", "SSC Coaching", "RRB Coaching", "SSC + RRB Coaching", "Reading Room / Study Centre Access"];
 
         const TARGETS = [
-            { m: "Jan", t: 25 }, { m: "Feb", t: 40 }, { m: "Mar", t: 60 }, { m: "Apr", t: 80 }, { m: "May", t: 100 }
+            { m: "Jan", y: 2026, t: 25 }, { m: "Feb", y: 2026, t: 40 }, { m: "Mar", y: 2026, t: 60 }, { m: "Apr", y: 2026, t: 80 }, { m: "May", y: 2026, t: 100 },
+            { m: "Jun", y: 2026, t: 125 }, { m: "Aug", y: 2026, t: 175 }, { m: "Oct", y: 2026, t: 225 }, { m: "Dec", y: 2026, t: 250 },
+            { m: "Mar", y: 2027, t: 300 }, { m: "Jun", y: 2027, t: 375 }, { m: "Sep", y: 2027, t: 450 }, { m: "Dec", y: 2027, t: 500 }
         ];
 
         const MONTH_MAP = { "Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "May": 4, "Jun": 5, "Jul": 6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11 };
 
         const PHASES = [
-            { id: 1, title: "Foundation (Jan-Feb)", desc: "Collect testimonials and run demo classes.", checklist: ["WhatsApp Broadcast List", "Collect 5 Testimonials", "Free Demo Classes", "Poster Campaign"] },
-            { id: 2, title: "Scale (Mar-Apr)", desc: "Daily shorts and referral program.", checklist: ["Daily YouTube Shorts", "Referral Program", "School Outreach", "Google My Business"] },
-            { id: 3, title: "Authority (May-Jun)", desc: "Paid ads and weekly webinars.", checklist: ["Paid Ads (Small)", "Weekly Webinars", "Newspaper Ads", "Content Pillars"] }
+            { id: 1, range: [0, 1], title: "Foundation", desc: "Build authority and gather testimonials.", checklist: ["Broadcast List", "5 Testimonials", "Demo Classes", "Poster Blitz"] },
+            { id: 2, range: [2, 3], title: "Scale Up", desc: "Focus on social media reach and referrals.", checklist: ["YouTube Daily", "Referral Program", "College Outreach", "Google Maps Setup"] },
+            { id: 3, range: [4, 5], title: "Authority", desc: "Professional image and targeted paid ads.", checklist: ["Weekly Webinars", "Newspaper Ads", "Paid Social Ads", "Alumni Meet"] },
+            { id: 4, range: [6, 11], title: "Brand Identity", desc: "Establishing an online footprint and LMS.", checklist: ["LMS Development", "Influencer Collabs", "Corporate Tie-ups", "Event Sponsorship"] },
+            { id: 5, range: [12, 23], title: "Expansion 2027", desc: "Scaling across districts with hybrid learning.", checklist: ["Satellite Centres", "Certification Partnership", "Hiring 5 Senior Staff", "Job Fair Hosting"] }
         ];
 
-        // State
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'futureuerp';
         
-        let appState = {
-            students: [],
-            transactions: [],
-            expenses: [],
-            user: null,
-            adminPin: '4568',
-            isAuthenticated: false,
-            currentInputPin: '',
-            targetTab: 'dashboard'
-        };
+        let appState = { students: [], transactions: [], expenses: [], user: null, adminPin: '4568', isAuthenticated: false, currentInputPin: '', targetTab: 'dashboard' };
 
-        // UI Helpers
-        const safeSetText = (id, text) => {
-            const el = document.getElementById(id);
-            if (el) el.innerText = text;
-        };
-
-        const safeSetHTML = (id, html) => {
-            const el = document.getElementById(id);
-            if (el) el.innerHTML = html;
-        };
-
-        const showNotif = (msg) => {
-            const n = document.getElementById('notif');
-            if (n) {
-                n.innerText = msg;
-                n.classList.remove('hidden');
-                setTimeout(() => n.classList.add('hidden'), 3000);
-            }
-        };
-
-        const closeModal = (id) => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        };
+        const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
+        const safeSetHTML = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+        const showNotif = (msg) => { const n = document.getElementById('notif'); if (n) { n.innerText = msg; n.classList.remove('hidden'); setTimeout(() => n.classList.add('hidden'), 3000); } };
+        const closeModal = (id) => { const el = document.getElementById(id); if (el) el.style.display = 'none'; };
         window.closeModal = closeModal;
 
         const showTab = (tabId) => {
             if((tabId === 'growth' || tabId === 'financials' || tabId === 'reports') && !appState.isAuthenticated) {
-                appState.targetTab = tabId;
-                const overlay = document.getElementById('pinOverlay');
-                if (overlay) overlay.classList.remove('hidden');
-                return;
+                appState.targetTab = tabId; document.getElementById('pinOverlay').classList.remove('hidden'); return;
             }
-
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            const targetEl = document.getElementById(tabId);
-            if (targetEl) targetEl.classList.add('active');
-            
+            const targetEl = document.getElementById(tabId); if (targetEl) targetEl.classList.add('active');
             document.querySelectorAll('.sidebar-item').forEach(el => el.classList.toggle('active', el.getAttribute('onclick').includes(tabId)));
-            
             const pageTitle = document.getElementById('pageTitle');
             if (pageTitle) {
-                const titles = { reports: "Detailed Reports", growth: "Growth Scoreboard", financials: "Financial Plan", dashboard: "Dashboard", students: "Student Database", fees: "Fee & Expenses" };
+                const titles = { reports: "Strategic Insights", growth: "Roadmap 2026-27", financials: "Financial Vault", dashboard: "Dashboard", students: "Student Database", fees: "Fee & Expenses" };
                 pageTitle.innerText = titles[tabId] || tabId.charAt(0).toUpperCase() + tabId.slice(1);
             }
             updateUI();
         };
         window.showTab = showTab;
 
-        window.toggleSidebar = () => {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) sidebar.classList.toggle('-translate-x-full');
-        };
-
-        // PIN Logic
-        window.pressPin = (num) => {
-            if(appState.currentInputPin.length < 4) {
-                appState.currentInputPin += num;
-                updatePinVisuals();
-                if(appState.currentInputPin.length === 4) { validatePin(); }
-            }
-        };
-
+        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); };
+        window.pressPin = (num) => { if(appState.currentInputPin.length < 4) { appState.currentInputPin += num; updatePinVisuals(); if(appState.currentInputPin.length === 4) { validatePin(); } } };
         window.clearPin = () => { appState.currentInputPin = ''; updatePinVisuals(); };
+        window.cancelPin = () => { clearPin(); document.getElementById('pinOverlay').classList.add('hidden'); };
+        const updatePinVisuals = () => { for(let i = 1; i <= 4; i++) { const dot = document.getElementById(`pin-${i}`); if(dot) { if(appState.currentInputPin.length >= i) { dot.classList.add('bg-blue-500', 'border-blue-500', 'scale-110'); } else { dot.classList.remove('bg-blue-500', 'border-blue-500', 'scale-110'); } } } };
+        const validatePin = () => { if(appState.currentInputPin === appState.adminPin) { appState.isAuthenticated = true; showNotif("Access Granted"); document.getElementById('pinOverlay').classList.add('hidden'); showTab(appState.targetTab); clearPin(); } else { showNotif("Access Denied"); clearPin(); } };
 
-        window.cancelPin = () => { clearPin(); const overlay = document.getElementById('pinOverlay'); if (overlay) overlay.classList.add('hidden'); };
-
-        const updatePinVisuals = () => {
-            for(let i = 1; i <= 4; i++) {
-                const dot = document.getElementById(`pin-${i}`);
-                if(dot) {
-                    if(appState.currentInputPin.length >= i) { dot.classList.add('bg-blue-500', 'border-blue-500'); } else { dot.classList.remove('bg-blue-500', 'border-blue-500'); }
-                }
-            }
-        };
-
-        const validatePin = () => {
-            if(appState.currentInputPin === appState.adminPin) {
-                appState.isAuthenticated = true;
-                showNotif("Access Granted");
-                const overlay = document.getElementById('pinOverlay');
-                if (overlay) overlay.classList.add('hidden');
-                showTab(appState.targetTab);
-                clearPin();
-            } else {
-                showNotif("Incorrect PIN");
-                clearPin();
-            }
-        };
-
-        window.updatePin = async () => {
-            const input = document.getElementById('newPin');
-            const newPin = input ? input.value : '';
-            if(newPin.length !== 4 || isNaN(newPin)) { showNotif("PIN must be 4 digits"); return; }
-            try {
-                const pinRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
-                await setDoc(pinRef, { pin: newPin }, { merge: true });
-                showNotif("PIN Updated Successfully");
-                if (input) input.value = '';
-            } catch (err) { showNotif("Error updating PIN"); }
-        };
-
-        // New Helper: Auto-populate fee amount
         const autoPopulateFee = () => {
             const sId = document.getElementById('feeStudentSelect').value;
-            const typeSelect = document.getElementById('feeType');
-            const type = typeSelect ? typeSelect.value : 'Monthly';
+            const type = document.getElementById('feeType')?.value || 'Monthly';
             const amountInput = document.getElementById('feeAmount');
             if (!sId || !amountInput) return;
             const student = appState.students.find(s => s.id == sId);
@@ -606,64 +536,31 @@
             if (type === 'Monthly') { amountInput.value = student.mlyFee || 0; } else if (type === 'Admission') { amountInput.value = student.admFee || 0; }
         };
 
-        // Init App
         const init = async () => {
             await signInAnonymously(auth);
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    appState.user = user;
-                    const overlay = document.getElementById('loadingOverlay');
-                    if (overlay) { overlay.style.opacity = '0'; setTimeout(() => overlay.style.display = 'none', 500); }
-                    startSync();
-                }
-            });
-
+            onAuthStateChanged(auth, (user) => { if (user) { appState.user = user; document.getElementById('loadingOverlay').style.opacity = '0'; setTimeout(() => document.getElementById('loadingOverlay').style.display = 'none', 500); startSync(); } });
             const today = new Date().toISOString().split('T')[0];
-            const currentYear = new Date().getFullYear();
-            const currentMonth = new Date().getMonth();
-
             safeSetText('currentDate', new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
-            
-            const stuDateInput = document.getElementById('stuDate'); if (stuDateInput) stuDateInput.value = today;
-            const feeDateInput = document.getElementById('feeDate'); if (feeDateInput) feeDateInput.value = today;
-            const expDateInput = document.getElementById('expDate'); if (expDateInput) expDateInput.value = today;
-            
+            document.getElementById('stuDate').value = today; document.getElementById('feeDate').value = today; document.getElementById('expDate').value = today;
             const nextMonth = new Date(); nextMonth.setDate(nextMonth.getDate() + 30);
-            const stuDueDateInput = document.getElementById('stuDueDate'); if (stuDueDateInput) stuDueDateInput.value = nextMonth.toISOString().split('T')[0];
-            
+            document.getElementById('stuDueDate').value = nextMonth.toISOString().split('T')[0];
             safeSetHTML('stuCourse', COURSE_LIST.map(c => `<option value="${c}">${c}</option>`).join(''));
-            
-            // Populate Year and Month selects for Reports
             const yrSelect = document.getElementById('reportYear');
-            if(yrSelect) {
-                yrSelect.innerHTML = [currentYear, currentYear-1].map(y => `<option value="${y}" ${y==currentYear?'selected':''}>${y}</option>`).join('');
-            }
-            const moSelect = document.getElementById('reportMonth');
-            if(moSelect) moSelect.value = currentMonth;
-
-            // Add listeners for auto-populating fees
-            const feeSelect = document.getElementById('feeStudentSelect');
-            const typeSelect = document.getElementById('feeType');
-            if (feeSelect) feeSelect.addEventListener('change', autoPopulateFee);
-            if (typeSelect) typeSelect.addEventListener('change', autoPopulateFee);
-
-            // Set Phase Info
-            const currentMonthIdx = new Date().getMonth();
-            let activePhase = PHASES[0]; if(currentMonthIdx >= 2 && currentMonthIdx <= 3) activePhase = PHASES[1]; if(currentMonthIdx >= 4) activePhase = PHASES[2];
-            safeSetText('currentPhaseTitle', activePhase.title); safeSetText('currentPhaseDesc', activePhase.desc);
-            safeSetHTML('phaseChecklist', activePhase.checklist.map(item => `<div class="flex items-center gap-3"><div class="w-5 h-5 border-2 border-white/40 rounded flex items-center justify-center text-[10px]"><i class="fas fa-check"></i></div><span class="text-xs font-medium">${item}</span></div>`).join(''));
+            if(yrSelect) yrSelect.innerHTML = [2026, 2027].map(y => `<option value="${y}">${y}</option>`).join('');
+            document.getElementById('reportMonth').value = new Date().getMonth();
+            const fSelect = document.getElementById('feeStudentSelect');
+            const tSelect = document.getElementById('feeType');
+            if (fSelect) fSelect.addEventListener('change', autoPopulateFee);
+            if (tSelect) tSelect.addEventListener('change', autoPopulateFee);
         };
 
         const startSync = () => {
             if (!appState.user) return;
             const pinRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
             onSnapshot(pinRef, (snap) => { if(snap.exists()) { appState.adminPin = snap.data().pin; } else { setDoc(pinRef, { pin: '4568' }); } });
-            const sRef = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-            onSnapshot(sRef, (snap) => { appState.students = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
-            const tRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
-            onSnapshot(tRef, (snap) => { appState.transactions = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
-            const eRef = collection(db, 'artifacts', appId, 'public', 'data', 'expenses');
-            onSnapshot(eRef, (snap) => { appState.expenses = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snap) => { appState.students = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), (snap) => { appState.transactions = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'expenses'), (snap) => { appState.expenses = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
         };
 
         const isPeriodMatch = (dateStr, month, year) => {
@@ -680,17 +577,11 @@
             const activeStudents = appState.students.filter(s => s.status === 'Active');
             const overdue = activeStudents.filter(s => new Date(s.nextDueDate) < today);
 
-            // Global Statistics
             const totalRev = appState.transactions.reduce((a, b) => a + (Number(b.amount) || 0), 0);
-            const totalExpAll = appState.expenses.reduce((a, b) => a + (Number(b.amount) || 0), 0);
-
-            // Report Tab Filtering Logic
             const repMo = document.getElementById('reportMonth')?.value || currMoIdx;
             const repYr = document.getElementById('reportYear')?.value || currYr;
-            
             const filteredTrans = appState.transactions.filter(t => isPeriodMatch(t.paidDate, repMo, repYr));
             const filteredExp = appState.expenses.filter(e => isPeriodMatch(e.date, repMo, repYr));
-
             const repRevTotal = filteredTrans.reduce((a, b) => a + (Number(b.amount) || 0), 0);
             const repExpTotal = filteredExp.reduce((a, b) => a + (Number(b.amount) || 0), 0);
             
@@ -700,80 +591,82 @@
             safeSetText('repMlyFee', `₹${filteredTrans.filter(t => t.type === 'Monthly').reduce((a,b) => a + Number(b.amount), 0).toLocaleString()}`);
             safeSetText('repAdvFee', `₹${filteredTrans.filter(t => t.type === 'Advance').reduce((a,b) => a + Number(b.amount), 0).toLocaleString()}`);
 
-            // Dashboard Monthly (Always Current Month)
             const monthlyRevSum = appState.transactions.filter(t => isPeriodMatch(t.paidDate, currMoIdx, currYr)).reduce((a, b) => a + (Number(b.amount) || 0), 0);
             const monthlyExpSum = appState.expenses.filter(e => isPeriodMatch(e.date, currMoIdx, currYr)).reduce((a, b) => a + (Number(b.amount) || 0), 0);
             safeSetText('statProfit', `₹${(monthlyRevSum - monthlyExpSum).toLocaleString()}`);
             safeSetText('statMonthlyRev', `Rev: ₹${monthlyRevSum.toLocaleString()}`);
             safeSetText('statMonthlyExp', `Exp: ₹${monthlyExpSum.toLocaleString()}`);
-
-            // Global Labels
             safeSetText('statActive', activeStudents.length);
             safeSetText('statOverdue', overdue.length);
-            safeSetText('statRevenue', `₹${totalRev.toLocaleString()}`); 
+            safeSetText('statRevenue', `₹${totalRev.toLocaleString()}`);
             safeSetText('statDebt', `₹${(totalRev * 0.2).toLocaleString()}`);
 
-            const prog = (activeStudents.length / 100) * 100;
-            const progressEl = document.getElementById('targetProgress'); if (progressEl) progressEl.style.width = Math.min(prog, 100) + '%';
-            safeSetText('targetText', `${activeStudents.length} / 100 Students`);
+            const visionProg = (activeStudents.length / 500) * 100;
+            const bar = document.getElementById('visionBar'); if (bar) bar.style.width = Math.min(visionProg, 100) + '%';
+            safeSetText('visionProgressText', `${activeStudents.length} / 500`);
 
-            // Course Breakdown Logic
-            const courseMap = {};
-            filteredTrans.forEach(t => {
-                const s = appState.students.find(stu => stu.id === t.studentId);
-                const cName = s ? s.course : 'General/Bulk';
-                courseMap[cName] = (courseMap[cName] || 0) + Number(t.amount);
-            });
-            const sortedCourses = Object.entries(courseMap).sort((a,b) => b[1] - a[1]);
-            safeSetHTML('courseRevenueList', sortedCourses.length ? sortedCourses.map(([name, amt]) => `
-                <div class="space-y-1">
-                    <div class="flex justify-between text-xs font-bold"><span>${name}</span><span>₹${amt.toLocaleString()}</span></div>
-                    <div class="w-full bg-gray-100 h-1.5 rounded-full"><div class="bg-blue-500 h-1.5 rounded-full" style="width: ${Math.min((amt/repRevTotal)*100 || 0, 100)}%"></div></div>
-                </div>
-            `).join('') : '<p class="text-sm text-gray-400 italic">No revenue recorded for selected period.</p>');
+            const monthsPassed = (currYr - 2026) * 12 + currMoIdx;
+            const activePhase = PHASES.find(p => monthsPassed >= p.range[0] && monthsPassed <= (p.range[1] || 99)) || PHASES[0];
+            safeSetText('currentPhaseBadge', activePhase.title);
+            safeSetText('currentPhaseTitle', `Goal: ${activePhase.title}`);
+            safeSetText('currentPhaseDesc', activePhase.desc);
+            safeSetHTML('phaseChecklist', activePhase.checklist.map(item => `<div class="flex items-center gap-3 text-xs font-bold text-slate-700"><i class="fas fa-check-circle text-blue-500"></i> ${item}</div>`).join(''));
+            safeSetText('growthPhaseTitle', activePhase.title);
+            safeSetText('growthPhaseDesc', activePhase.desc);
+            safeSetHTML('growthChecklist', activePhase.checklist.map(item => `<div class="flex items-center gap-3"><div class="w-5 h-5 bg-white/20 rounded flex items-center justify-center text-[10px]"><i class="fas fa-check"></i></div><span class="text-xs font-bold uppercase tracking-widest">${item}</span></div>`).join(''));
 
-            // Performance Body
             safeSetHTML('performanceBody', TARGETS.map(target => {
-                const targetMo = MONTH_MAP[target.m];
-                const monthAdmissions = appState.students.filter(s => { if (!s.date) return false; const [y, m, d] = s.date.split('-').map(Number); return (m - 1) === targetMo && y === currYr; }).length;
-                const monthRev = appState.transactions.filter(t => { if (!t.paidDate) return false; const [y, m, d] = t.paidDate.split('-').map(Number); return (m - 1) === targetMo && y === currYr; }).reduce((a, b) => a + (Number(b.amount) || 0), 0);
-                const status = activeStudents.length >= target.t ? '✅ Met' : '📈 Progress';
-                return `<tr class="border-b border-gray-50 ${targetMo === currMoIdx ? 'bg-blue-50/50' : ''}"><td class="py-3 font-bold">${target.m}</td><td class="py-3 text-gray-500">${target.t} Students</td><td class="py-3 font-bold">${monthAdmissions} Joined</td><td class="py-3 font-bold text-green-600">₹${monthRev.toLocaleString()}</td><td class="py-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${activeStudents.length >= target.t ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">${status}</span></td></tr>`;
+                const targetMoIdx = MONTH_MAP[target.m];
+                const admissionsCount = appState.students.filter(s => { if (!s.date) return false; const [y, m, d] = s.date.split('-').map(Number); return (m - 1) === targetMoIdx && y === target.y; }).length;
+                const actualRev = appState.transactions.filter(t => { if (!t.paidDate) return false; const [y, m, d] = t.paidDate.split('-').map(Number); return (m - 1) === targetMoIdx && y === target.y; }).reduce((a, b) => a + (Number(b.amount) || 0), 0);
+                const status = activeStudents.length >= target.t ? '✅ Met' : '🚀 Target';
+                return `<tr class="border-b border-gray-50 ${targetMoIdx === currMoIdx && target.y === currYr ? 'bg-blue-50/50' : ''} text-center"><td class="py-4 font-black text-left">${target.m} ${target.y}</td><td class="py-4 text-gray-500">${target.t} Students</td><td class="py-4 font-black">${admissionsCount}</td><td class="py-4 font-black text-green-600">₹${actualRev.toLocaleString()}</td><td class="py-4 text-right"><span class="px-2 py-1 rounded-full text-[10px] font-black ${activeStudents.length >= target.t ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">${status}</span></td></tr>`;
             }).join(''));
 
-            // Transactions history list
+            const courseMap = {};
+            filteredTrans.forEach(t => { const s = appState.students.find(stu => stu.id === t.studentId); const cName = s ? s.course : 'General/Bulk'; courseMap[cName] = (courseMap[cName] || 0) + Number(t.amount); });
+            const sortedCourses = Object.entries(courseMap).sort((a,b) => b[1] - a[1]);
+            safeSetHTML('courseRevenueList', sortedCourses.length ? sortedCourses.map(([name, amt]) => `<div class="space-y-2"><div class="flex justify-between text-xs font-black"><span>${name}</span><span>₹${amt.toLocaleString()}</span></div><div class="w-full bg-gray-100 h-2 rounded-full"><div class="bg-blue-600 h-2 rounded-full shadow-sm" style="width: ${Math.min((amt/repRevTotal)*100 || 0, 100)}%"></div></div></div>`).join('') : '<p class="text-sm text-gray-400 italic">No revenue recorded.</p>');
+
+            const refMap = {};
+            appState.students.forEach(s => { if(s.referral) refMap[s.referral] = (refMap[s.referral] || 0) + 1; });
+            safeSetHTML('referralList', Object.entries(refMap).map(([src, count]) => `<div class="bg-indigo-50 p-6 rounded-2xl flex justify-between items-center"><div><p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Source</p><p class="text-sm font-black text-indigo-900">${src}</p></div><span class="bg-white px-3 py-1 rounded-full text-xs font-black text-indigo-600 shadow-sm">${count}</span></div>`).join('') || '<p class="text-xs text-gray-400 italic">No referral data.</p>');
+
             const allHistory = [...appState.transactions.map(t => ({ ...t, kind: 'fee' })), ...appState.expenses.map(e => ({ ...e, kind: 'exp', paidDate: e.date, studentName: e.name }))].sort((a,b) => new Date(b.paidDate) - new Date(a.paidDate));
-            safeSetHTML('transactionList', allHistory.slice(0, 30).map(item => `<div class="flex justify-between items-center p-4 rounded-2xl border ${item.kind === 'fee' ? 'bg-green-50/50 border-green-100' : 'bg-red-50/50 border-red-100'}"><div class="flex-1"><p class="font-bold text-gray-800 text-sm">${item.studentName}</p><p class="text-[9px] text-gray-400 font-bold uppercase">${item.paidDate} • ${item.kind === 'fee' ? 'FEE COLLECTION' : 'EXPENSE'}</p></div><div class="flex items-center gap-4"><p class="font-bold text-sm ${item.kind === 'fee' ? 'text-green-600' : 'text-red-600'}">${item.kind === 'fee' ? '+' : '-'}₹${item.amount}</p><button onclick="window.deleteEntry('${item.id}', '${item.kind}')" class="text-gray-300 hover:text-red-500 transition-colors p-1"><i class="fas fa-trash-alt"></i></button></div></div>`).join(''));
+            safeSetHTML('transactionList', allHistory.slice(0, 30).map(item => `<div class="flex justify-between items-center p-5 rounded-3xl border ${item.kind === 'fee' ? 'bg-green-50/30 border-green-100' : 'bg-red-50/30 border-red-100'}"><div class="flex-1"><p class="font-black text-slate-800 text-sm">${item.studentName}</p><p class="text-[9px] text-gray-400 font-black uppercase tracking-widest">${item.paidDate} • ${item.kind === 'fee' ? 'FEE COLLECTION' : 'EXPENSE'}</p></div><div class="flex items-center gap-4"><p class="font-black text-sm ${item.kind === 'fee' ? 'text-green-600' : 'text-red-600'}">${item.kind === 'fee' ? '+' : '-'}₹${item.amount}</p><button onclick="window.deleteEntry('${item.id}', '${item.kind}')" class="text-gray-300 hover:text-red-500 transition-colors p-2"><i class="fas fa-trash-alt"></i></button></div></div>`).join(''));
 
-            // Follow-ups
-            const followUps = overdue.sort((a,b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
-            safeSetHTML('followUpList', followUps.length ? followUps.slice(0, 5).map(s => `<div class="flex justify-between items-center p-3 bg-red-50 border border-red-100 rounded-xl"><span class="text-xs font-bold text-red-700">${s.name}</span><span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-red-500">Due: ${s.nextDueDate}</span></div>`).join('') : '<p class="text-sm text-gray-400 italic">Everyone is up to date!</p>');
-
-            // Student Table
             safeSetHTML('studentTableBody', appState.students.map(s => {
                 const isOverdue = new Date(s.nextDueDate) < today && s.status === 'Active';
-                return `<tr class="border-b hover:bg-gray-50 text-sm"><td class="p-4"><p class="font-bold text-gray-800">${s.name}</p></td><td class="p-4 text-xs max-w-[120px] truncate">${s.course}</td><td class="p-4 font-semibold text-blue-600">₹${s.mlyFee}</td><td class="p-4"><span class="px-2 py-1 rounded-lg font-bold text-[10px] ${isOverdue ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${s.nextDueDate}</span></td><td class="p-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">${s.status}</span></td><td class="p-4 flex gap-3"><button onclick="window.updateStatus('${s.id}', '${s.status === 'Active' ? 'Stopped' : 'Active'}')" class="text-gray-400 hover:text-blue-600"><i class="fas ${s.status === 'Active' ? 'fa-stop-circle' : 'fa-play-circle'}"></i></button><button onclick="window.deleteStudent('${s.id}')" class="text-gray-300 hover:text-red-500"><i class="fas fa-trash"></i></button></td></tr>`;
+                return `<tr class="border-b hover:bg-gray-50/50 transition-all text-sm"><td class="p-6"><p class="font-black text-slate-800">${s.name}</p><p class="text-[10px] text-gray-400 font-bold">${s.phone || 'No Phone'}</p></td><td class="p-6 text-xs font-bold max-w-[120px] truncate">${s.course}</td><td class="p-6 font-black text-blue-600 text-center">₹${s.mlyFee}</td><td class="p-6 text-center"><span class="px-3 py-1 rounded-lg font-black text-[10px] ${isOverdue ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${s.nextDueDate}</span></td><td class="p-6 text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">${s.status}</span></td><td class="p-6 flex gap-2 justify-end"><button onclick="window.updateStatus('${s.id}', '${s.status === 'Active' ? 'Stopped' : 'Active'}')" class="text-gray-400 hover:text-blue-600 p-2"><i class="fas ${s.status === 'Active' ? 'fa-stop-circle' : 'fa-play-circle'}"></i></button><button onclick="window.deleteStudent('${s.id}')" class="text-gray-300 hover:text-red-500 p-2"><i class="fas fa-trash"></i></button></td></tr>`;
             }).join(''));
 
-            safeSetHTML('feeStudentSelect', '<option value="">Select Student...</option>' + activeStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join(''));
-
-            // Allocation Logic
+            safeSetHTML('feeStudentSelect', '<option value="">Choose Student...</option>' + activeStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join(''));
             const al = [{ n: 'Essentials', v: 0.35, c: 'blue' }, { n: 'Reinvestment', v: 0.20, c: 'indigo' }, { n: 'Debt', v: 0.20, c: 'red' }, { n: 'Savings', v: 0.15, c: 'green' }, { n: 'Personal', v: 0.10, c: 'yellow' }];
-            safeSetHTML('allocationStats', `<h4 class="font-bold mb-6 text-xl">Allocation Logic (Based on Total Income)</h4>` + al.map(cat => `<div class="mb-5"><div class="flex justify-between text-xs font-bold mb-1"><span>${cat.n} (${cat.v*100}%)</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div><div class="w-full bg-gray-100 h-1.5 rounded-full"><div class="bg-${cat.c}-500 h-1.5 rounded-full" style="width:${cat.v*100}%"></div></div></div>`).join(''));
-            safeSetHTML('miniAlloc', al.slice(0, 3).map(cat => `<div class="flex justify-between text-xs font-medium opacity-80"><span>${cat.n}</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div>`).join(''));
+            safeSetHTML('allocationStats', `<h4 class="font-black mb-8 text-xl text-center">Vision Allocation Rule</h4>` + al.map(cat => `<div class="mb-6"><div class="flex justify-between text-xs font-black mb-2"><span>${cat.n} (${cat.v*100}%)</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div><div class="w-full bg-gray-100 h-2 rounded-full"><div class="bg-${cat.c}-500 h-2 rounded-full shadow-sm" style="width:${cat.v*100}%"></div></div></div>`).join(''));
+            safeSetHTML('miniAlloc', al.slice(0, 3).map(cat => `<div class="flex justify-between text-xs font-black opacity-80"><span>${cat.n}</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div>`).join(''));
+
+            const flList = document.getElementById('followUpList');
+            const followUps = activeStudents.filter(s => new Date(s.nextDueDate) <= today).sort((a,b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
+            safeSetHTML('followUpList', followUps.length ? followUps.slice(0, 5).map(s => `<div class="flex justify-between items-center p-3 bg-red-50 border border-red-100 rounded-xl"><span class="text-xs font-bold text-red-700">${s.name}</span><span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-red-500">Due: ${s.nextDueDate}</span></div>`).join('') : '<p class="text-sm text-gray-400 italic">No critical follow-ups today.</p>');
         };
 
-        // ACTIONS
+        window.copyNumbers = () => {
+            const nums = appState.students.filter(s => s.status === 'Active').map(s => s.phone).filter(p => p).join(', ');
+            const dummy = document.createElement("textarea"); document.body.appendChild(dummy);
+            dummy.value = nums; dummy.select(); document.execCommand("copy"); document.body.removeChild(dummy);
+            showNotif("Phone numbers copied!");
+        };
+
         document.getElementById('enrollmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('stuName').value;
             const admFee = Number(document.getElementById('stuAdmFee').value);
             const joiningDate = document.getElementById('stuDate').value;
-            const student = { name: name, course: document.getElementById('stuCourse').value, admFee: admFee, mlyFee: Number(document.getElementById('stuMlyFee').value), date: joiningDate, nextDueDate: document.getElementById('stuDueDate').value, status: 'Active', totalPaid: admFee, createdAt: new Date().toISOString() };
+            const student = { name, course: document.getElementById('stuCourse').value, admFee, mlyFee: Number(document.getElementById('stuMlyFee').value), date: joiningDate, nextDueDate: document.getElementById('stuDueDate').value, status: 'Active', totalPaid: admFee, referral: document.getElementById('stuReferral').value, phone: document.getElementById('stuPhone').value, createdAt: new Date().toISOString() };
             try {
                 const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), student);
-                if (admFee > 0) { await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: docRef.id, studentName: name, amount: admFee, type: 'Admission', paidDate: joiningDate, cycleDueDate: 'Joining Day' }); }
-                showNotif('Student enrolled & fee recorded!'); closeModal('studentModal'); e.target.reset();
+                if (admFee > 0) await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: docRef.id, studentName: name, amount: admFee, type: 'Admission', paidDate: joiningDate, cycleDueDate: 'Joining Day' });
+                showNotif('Authorized & Enrolled!'); closeModal('studentModal'); e.target.reset();
             } catch (err) { showNotif("Error during enrollment"); }
         });
 
@@ -784,22 +677,21 @@
             const paidDate = document.getElementById('feeDate').value;
             const amount = Number(document.getElementById('feeAmount').value);
             const nextDueObj = new Date(paidDate); nextDueObj.setDate(nextDueObj.getDate() + 30);
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: sId, studentName: student.name, amount: amount, type: document.getElementById('feeType').value, paidDate, cycleDueDate: student.nextDueDate });
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: sId, studentName: student.name, amount, type: document.getElementById('feeType').value, paidDate, cycleDueDate: student.nextDueDate });
             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', sId), { nextDueDate: nextDueObj.toISOString().split('T')[0], totalPaid: (student.totalPaid || 0) + amount });
-            showNotif('Payment Recorded!'); e.target.reset();
+            showNotif('Receipt Synced!'); e.target.reset();
         });
 
         document.getElementById('expenseForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'expenses'), { name: document.getElementById('expName').value, amount: Number(document.getElementById('expAmount').value), date: document.getElementById('expDate').value });
-            showNotif('Expense Recorded!'); e.target.reset();
+            showNotif('Expense Authorized!'); e.target.reset();
         });
 
         window.updateStatus = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id), { status }); showNotif('Status updated'); };
-        window.deleteStudent = async (id) => { if (confirm("Delete student? All linked data will be lost.")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id)); };
-        
+        window.deleteStudent = async (id) => { if (confirm("Delete record?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id)); };
         window.deleteEntry = async (id, kind) => {
-            if (!confirm(`Permanently delete this faulty ${kind === 'fee' ? 'fee record' : 'expense'}?`)) return;
+            if (!confirm(`Delete entry?`)) return;
             try {
                 if (kind === 'fee') {
                     const tRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', id);
@@ -809,18 +701,23 @@
                         if (data.studentId) {
                             const sRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', data.studentId);
                             const sSnap = await getDoc(sRef);
-                            if (sSnap.exists()) { const currentTotal = sSnap.data().totalPaid || 0; await updateDoc(sRef, { totalPaid: Math.max(0, currentTotal - Number(data.amount)) }); }
+                            if (sSnap.exists()) { await updateDoc(sRef, { totalPaid: Math.max(0, (sSnap.data().totalPaid || 0) - Number(data.amount)) }); }
                         }
                     }
                     await deleteDoc(tRef);
                 } else { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'expenses', id)); }
-                showNotif("Faulty entry removed.");
+                showNotif("Entry removed.");
             } catch (err) { showNotif("Error removing entry."); }
         };
-
         window.openModal = (id) => { const el = document.getElementById(id); if (el) el.style.display = 'flex'; }
-        window.exportBackup = () => { const data = { students: appState.students, transactions: appState.transactions, expenses: appState.expenses, exportedAt: new Date().toISOString() }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `FutureU_Backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); };
-        window.toggleTask = (type) => { showNotif(`${type.toUpperCase()} recorded for today.`); };
+        window.exportBackup = () => { const data = { students: appState.students, transactions: appState.transactions, expenses: appState.expenses }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `FutureU_Backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); };
+        window.updatePin = async () => {
+            const newPin = document.getElementById('newPin').value;
+            if(newPin.length !== 4 || isNaN(newPin)) { showNotif("PIN must be 4 digits"); return; }
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin'), { pin: newPin });
+            showNotif("PIN Updated"); document.getElementById('newPin').value = '';
+        };
+        window.toggleTask = (type) => { showNotif(`${type.toUpperCase()} recorded.`); };
         init();
     </script>
 </body>
