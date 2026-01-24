@@ -3,522 +3,704 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Future U - Physical-to-Digital ERP</title>
+    <title>Future U - Digital Ledger & ERP</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
+        .glass-card { background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
         .sidebar-item.active { background-color: #3b82f6; color: white; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        #loadingOverlay { transition: opacity 0.5s ease-out; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .ledger-table thead th { position: sticky; top: 0; background: #f8fafc; z-index: 10; }
-        .in-cell { color: #059669; }
-        .out-cell { color: #dc2626; }
-        .sub-tab.active { border-bottom: 3px solid #3b82f6; color: #3b82f6; font-weight: 800; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .status-badge-active { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .status-badge-stopped { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .student-photo { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; background: #f1f5f9; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .profile-photo-large { width: 120px; height: 120px; border-radius: 2rem; object-fit: cover; border: 4px solid #f8fafc; shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen pb-12">
 
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white z-[300] flex flex-col items-center justify-center text-center">
-        <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-gray-500 font-medium text-sm tracking-wider uppercase">Future U<br><span class="text-[10px]">Financial Intelligence</span></p>
+        <div class="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-6"></div>
+        <h2 class="text-xl font-black text-slate-800 tracking-tighter uppercase">Future U Digital</h2>
+        <p class="text-gray-400 font-medium text-[10px] tracking-widest uppercase mt-2">Syncing Physical to Digital Ledger...</p>
     </div>
 
     <!-- PIN Lock Overlay -->
-    <div id="pinOverlay" class="fixed inset-0 bg-slate-900/95 z-[250] hidden flex-col items-center justify-center p-6 backdrop-blur-md">
-        <div class="w-full max-w-xs text-center text-white">
-            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6 mx-auto shadow-xl"><i class="fas fa-key"></i></div>
-            <h3 class="text-xl font-bold mb-2">Owner's Ledger Access</h3>
-            <p class="text-slate-400 text-sm mb-8">Enter PIN to access Digital Books.</p>
-            <div class="flex justify-center gap-3 mb-8">
-                <div id="pin-1" class="w-4 h-4 rounded-full border-2 border-slate-600"></div>
-                <div id="pin-2" class="w-4 h-4 rounded-full border-2 border-slate-600"></div>
-                <div id="pin-3" class="w-4 h-4 rounded-full border-2 border-slate-600"></div>
-                <div id="pin-4" class="w-4 h-4 rounded-full border-2 border-slate-600"></div>
+    <div id="pinOverlay" class="fixed inset-0 bg-slate-900/98 z-[250] hidden flex-col items-center justify-center p-6 backdrop-blur-md">
+        <div class="w-full max-w-xs text-center">
+            <div class="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center text-white text-3xl mb-8 mx-auto shadow-2xl"><i class="fas fa-lock"></i></div>
+            <h3 class="text-white text-2xl font-black mb-10 text-center">Owner Authorization</h3>
+            <div class="flex justify-center gap-4 mb-10">
+                <div id="pin-1" class="w-5 h-5 rounded-full border-2 border-slate-700"></div>
+                <div id="pin-2" class="w-5 h-5 rounded-full border-2 border-slate-700"></div>
+                <div id="pin-3" class="w-5 h-5 rounded-full border-2 border-slate-700"></div>
+                <div id="pin-4" class="w-5 h-5 rounded-full border-2 border-slate-700"></div>
             </div>
-            <div class="grid grid-cols-3 gap-4">
-                <button onclick="pressPin('1')" class="h-14 bg-slate-800 rounded-xl font-bold">1</button>
-                <button onclick="pressPin('2')" class="h-14 bg-slate-800 rounded-xl font-bold">2</button>
-                <button onclick="pressPin('3')" class="h-14 bg-slate-800 rounded-xl font-bold">3</button>
-                <button onclick="pressPin('4')" class="h-14 bg-slate-800 rounded-xl font-bold">4</button>
-                <button onclick="pressPin('5')" class="h-14 bg-slate-800 rounded-xl font-bold">5</button>
-                <button onclick="pressPin('6')" class="h-14 bg-slate-800 rounded-xl font-bold">6</button>
-                <button onclick="pressPin('7')" class="h-14 bg-slate-800 rounded-xl font-bold">7</button>
-                <button onclick="pressPin('8')" class="h-14 bg-slate-800 rounded-xl font-bold">8</button>
-                <button onclick="pressPin('9')" class="h-14 bg-slate-800 rounded-xl font-bold">9</button>
-                <button onclick="clearPin()" class="h-14 bg-red-900/30 text-red-500 rounded-xl text-xs font-bold">CLR</button>
-                <button onclick="pressPin('0')" class="h-14 bg-slate-800 rounded-xl font-bold">0</button>
-                <button onclick="cancelPin()" class="h-14 bg-slate-800 text-slate-400 rounded-xl text-xs font-bold">ESC</button>
+            <div class="grid grid-cols-3 gap-5">
+                <button onclick="pressPin('1')" class="h-16 bg-slate-800 text-white rounded-2xl text-2xl font-black hover:bg-slate-700">1</button>
+                <button onclick="pressPin('2')" class="h-16 bg-slate-800 text-white rounded-2xl text-2xl font-black hover:bg-slate-700">2</button>
+                <button onclick="pressPin('3')" class="h-16 bg-slate-800 text-white rounded-2xl text-2xl font-black hover:bg-slate-700">3</button>
+                <button onclick="pressPin('4')" class="h-16 bg-slate-800 text-white rounded-2xl text-2xl font-black hover:bg-slate-700">4</button>
+                <button onclick="pressPin('5')" class="h-16 bg-slate-800 text-white rounded-2xl text-2xl font-black hover:bg-slate-700">5</button>
+                <button onclick="pressPin('6')" class="h-16 bg-slate-800 text-white rounded-2xl text-2xl font-black hover:bg-slate-700">6</button>
+                <button onclick="pressPin('7')" class="h-16 bg-slate-800 text-white rounded-2xl text-2xl font-black hover:bg-slate-700">7</button>
+                <button onclick="pressPin('8')" class="h-16 bg-slate-800 text-white rounded-2xl text-2xl font-black hover:bg-slate-700">8</button>
+                <button onclick="pressPin('9')" class="h-16 bg-slate-800 text-white rounded-2xl text-2xl font-black hover:bg-slate-700">9</button>
+                <button onclick="clearPin()" class="h-16 bg-red-900/20 text-red-500 rounded-2xl font-black">CLR</button>
+                <button onclick="pressPin('0')" class="h-16 bg-slate-800 text-white rounded-2xl text-2xl font-black hover:bg-slate-700">0</button>
+                <button onclick="cancelPin()" class="h-16 bg-slate-800 text-slate-400 rounded-2xl font-black uppercase text-center">ESC</button>
             </div>
         </div>
     </div>
 
     <!-- Sidebar -->
     <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-2xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 overflow-y-auto">
-        <div class="p-6 border-b border-gray-50">
+        <div class="p-8 border-b border-slate-50">
             <h1 class="text-2xl font-black text-blue-600 flex items-center gap-2">
                 <i class="fas fa-graduation-cap"></i> FUTURE U
             </h1>
-            <p class="text-[9px] text-gray-400 mt-1 uppercase tracking-[0.2em] font-extrabold text-center sm:text-left">Vision 2027 Dashboard</p>
+            <p class="text-[9px] text-slate-400 mt-2 uppercase tracking-[0.2em] font-black">Master Digital Ledger</p>
         </div>
-        <nav class="mt-4 px-4 space-y-1">
-            <button onclick="showTab('dashboard')" class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold text-sm">
-                <i class="fas fa-chart-pie w-5"></i> Dashboard
+        <nav class="mt-6 px-4 space-y-1">
+            <button onclick="showTab('dashboard')" class="sidebar-item active w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all hover:bg-blue-50">
+                <i class="fas fa-chart-line w-6 text-blue-500"></i> <span class="font-bold text-sm">Dashboard</span>
             </button>
-            <button onclick="showTab('students')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold text-sm">
-                <i class="fas fa-user-graduate w-5"></i> Student List
+            <button onclick="showTab('students')" class="sidebar-item w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all hover:bg-blue-50">
+                <i class="fas fa-user-graduate w-6 text-indigo-500"></i> <span class="font-bold text-sm">Students</span>
             </button>
-            <div class="pt-4 pb-2"><p class="text-[10px] text-gray-400 font-black uppercase tracking-widest px-4">The Digital Registers</p></div>
-            <button onclick="showTab('ledger')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold text-sm">
-                <i class="fas fa-book-open w-5"></i> All Ledgers <i class="fas fa-lock ml-auto text-[10px] opacity-20"></i>
+            <button onclick="showTab('fees')" class="sidebar-item w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all hover:bg-blue-50">
+                <i class="fas fa-book-open w-6 text-green-500"></i> <span class="font-bold text-sm">Digital Ledger</span>
             </button>
-            <button onclick="showTab('owner')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold text-sm">
-                <i class="fas fa-user-tie w-5"></i> Capital & Drawings <i class="fas fa-lock ml-auto text-[10px] opacity-20"></i>
+            <div class="pt-6 pb-2 px-4"><p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Business Intelligence</p></div>
+            <button onclick="showTab('reports')" class="sidebar-item w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all hover:bg-blue-50">
+                <i class="fas fa-chart-bar w-6 text-blue-600"></i> <span class="font-bold text-sm">Reports</span> <i class="fas fa-lock ml-auto text-[9px] opacity-30"></i>
             </button>
-            <div class="pt-4 pb-2"><p class="text-[10px] text-gray-400 font-black uppercase tracking-widest px-4">Strategy</p></div>
-            <button onclick="showTab('reports')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold text-sm">
-                <i class="fas fa-file-invoice-dollar w-5"></i> P&L Reports
+            <button onclick="showTab('growth')" class="sidebar-item w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all hover:bg-blue-50">
+                <i class="fas fa-rocket w-6 text-red-500"></i> <span class="font-bold text-sm">Roadmap</span> <i class="fas fa-lock ml-auto text-[9px] opacity-30"></i>
+            </button>
+            <button onclick="showTab('financials')" class="sidebar-item w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all hover:bg-blue-50">
+                <i class="fas fa-vault w-6 text-slate-600"></i> <span class="font-bold text-sm">Vault</span> <i class="fas fa-lock ml-auto text-[9px] opacity-30"></i>
             </button>
         </nav>
+        <div class="absolute bottom-6 left-6 right-6">
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-4 text-white shadow-lg text-center">
+                <p class="text-[10px] font-bold uppercase opacity-80 tracking-widest">Vision 2027</p>
+                <p id="visionProgressText" class="text-xl font-black mt-1">0 / 500</p>
+                <div class="w-full bg-white/20 rounded-full h-1 mt-3">
+                    <div id="visionBar" class="bg-white h-full rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
     </aside>
 
-    <!-- Main -->
-    <main class="lg:ml-64 p-4 lg:p-10">
-        <header class="flex justify-between items-center mb-10">
-            <button class="lg:hidden text-2xl p-2 bg-white rounded-xl shadow-sm" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <!-- Main Content -->
+    <main class="lg:ml-64 p-4 lg:p-12">
+        <header class="flex justify-between items-center mb-10 text-center lg:text-left">
+            <button class="lg:hidden text-2xl p-3 bg-white rounded-2xl shadow-sm" onclick="window.toggleSidebar()"><i class="fas fa-bars"></i></button>
             <div>
-                <h2 id="pageTitle" class="text-3xl font-black tracking-tight text-slate-800">Dashboard</h2>
-                <p id="currentDate" class="text-sm font-semibold text-gray-400 mt-1"></p>
+                <h2 id="pageTitle" class="text-3xl font-black tracking-tight text-slate-800">Control Panel</h2>
+                <p id="currentDate" class="text-sm font-bold text-slate-400 mt-1"></p>
             </div>
-            <div class="text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Master Cash Balance</p>
-                <p id="totalCashBalance" class="text-2xl font-black text-blue-600">₹0</p>
-            </div>
+            <div class="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center border border-gray-100 font-black text-blue-600 text-xl">FU</div>
         </header>
 
         <!-- DASHBOARD -->
-        <div id="dashboard" class="tab-content active space-y-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="glass-card p-6 rounded-3xl border-b-4 border-blue-500">
-                    <p class="text-gray-400 font-bold text-[10px] uppercase tracking-widest">Active Enrollment</p>
-                    <p id="statActive" class="text-3xl font-black mt-1">0</p>
+        <div id="dashboard" class="tab-content active space-y-10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8">
+                <div class="glass-card p-8 rounded-[2.5rem] border-b-8 border-blue-500">
+                    <h3 class="text-slate-400 font-black text-[10px] uppercase tracking-widest text-center">Cash Book Balance</h3>
+                    <p id="statCashInHand" class="text-4xl font-black mt-3 text-center tracking-tight">₹0</p>
+                    <span class="text-[9px] text-slate-400 block text-center mt-2 uppercase font-bold">Income - Drawings - Exp</span>
                 </div>
-                <div class="glass-card p-6 rounded-3xl border-b-4 border-emerald-500">
-                    <p class="text-gray-400 font-bold text-[10px] uppercase tracking-widest">Institute Profit</p>
-                    <p id="statProfit" class="text-3xl font-black mt-1 text-emerald-600">₹0</p>
+                <div class="glass-card p-8 rounded-[2.5rem] border-b-8 border-green-600">
+                    <h3 class="text-slate-400 font-black text-[10px] uppercase tracking-widest text-center">Monthly Profit</h3>
+                    <p id="statProfit" class="text-4xl font-black mt-3 text-center text-green-600">₹0</p>
+                    <div class="mt-3 flex justify-between text-[9px] font-black uppercase tracking-widest px-2">
+                        <span class="text-blue-500" id="statMonthlyRev">In: ₹0</span>
+                        <span class="text-red-500" id="statMonthlyExp">Out: ₹0</span>
+                    </div>
                 </div>
-                <div class="glass-card p-6 rounded-3xl border-b-4 border-red-500">
-                    <p class="text-gray-400 font-bold text-[10px] uppercase tracking-widest">Fees Overdue</p>
-                    <p id="statOverdue" class="text-3xl font-black mt-1 text-red-600">0</p>
+                <div class="glass-card p-8 rounded-[2.5rem] border-b-8 border-red-500 text-center">
+                    <h3 class="text-slate-400 font-black text-[10px] uppercase tracking-widest">Active Overdue</h3>
+                    <p id="statOverdue" class="text-5xl font-black mt-3 text-red-600">0</p>
                 </div>
-                <div class="glass-card p-6 rounded-3xl border-b-4 border-indigo-500">
-                    <p class="text-gray-400 font-bold text-[10px] uppercase tracking-widest">Vision Growth</p>
-                    <p id="visionPercent" class="text-3xl font-black mt-1">0%</p>
+                <div class="glass-card p-8 rounded-[2.5rem] border-b-8 border-indigo-500 text-center">
+                    <h3 class="text-slate-400 font-black text-[10px] uppercase tracking-widest">Total Admissions</h3>
+                    <p id="statActive" class="text-5xl font-black mt-3">0</p>
                 </div>
             </div>
 
-            <!-- Quick Entry Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
-                    <h4 class="font-black text-lg mb-6 flex items-center gap-3 text-blue-600"><i class="fas fa-wallet"></i> Fee Collection (Income)</h4>
-                    <form id="feeForm" class="space-y-4">
-                        <select id="feeStudentSelect" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required></select>
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="number" id="feeAmount" placeholder="Amount ₹" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required>
-                            <select id="feeMode" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm">
-                                <option value="Cash">Cash</option>
-                                <option value="UPI/Gpay">UPI / GPay</option>
-                                <option value="Bank">Bank Transfer</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="text" id="feeReceipt" placeholder="Receipt No (Optional)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm">
-                            <input type="date" id="feeDate" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required>
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-blue-700 transition-all">Record in Income Register</button>
-                    </form>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-10">
+                <div class="glass-card p-10 rounded-[3rem]">
+                    <h4 class="font-black text-xl mb-8 flex items-center gap-4"><i class="fas fa-medal text-yellow-500"></i> Course Track Performance</h4>
+                    <div id="dashCourseList" class="space-y-6"></div>
                 </div>
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
-                    <h4 class="font-black text-lg mb-6 flex items-center gap-3 text-red-600"><i class="fas fa-receipt"></i> Expense Payment</h4>
-                    <form id="expenseForm" class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="text" id="expName" placeholder="Purpose (What?)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required>
-                            <select id="expHead" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm">
-                                <option value="Rent">Rent</option>
-                                <option value="Electricity">Electricity</option>
-                                <option value="Salary">Salary</option>
-                                <option value="Marketing">Marketing</option>
-                                <option value="Internet">Internet</option>
-                                <option value="Stationery">Stationery</option>
-                                <option value="Misc">Miscellaneous</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="number" id="expAmount" placeholder="Amount ₹" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required>
-                            <select id="expMode" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm">
-                                <option value="Cash">Cash</option>
-                                <option value="UPI/Gpay">UPI / GPay</option>
-                                <option value="Bank">Bank Transfer</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="text" id="expPaidBy" placeholder="Paid By (Name)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm">
-                            <input type="date" id="expDate" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required>
-                        </div>
-                        <button type="submit" class="w-full bg-red-500 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-red-600 transition-all">Record in Expense Register</button>
-                    </form>
+                <div class="glass-card p-10 rounded-[3rem]">
+                    <h4 class="font-black text-xl mb-8 flex items-center gap-4"><i class="fas fa-chart-line text-blue-600"></i> Revenue Trend</h4>
+                    <canvas id="revenueChart" class="w-full max-h-[300px]"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- DIGITAL LEDGERS TAB -->
-        <div id="ledger" class="tab-content space-y-6">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-gray-100 pb-4">
-                <div class="flex gap-6 overflow-x-auto w-full sm:w-auto">
-                    <button onclick="filterLedger('all')" id="tab-all" class="sub-tab p-2 text-xs font-black uppercase tracking-widest transition-all active">Master Cash Book</button>
-                    <button onclick="filterLedger('Fee')" id="tab-Fee" class="sub-tab p-2 text-xs font-black uppercase tracking-widest transition-all">Income Register</button>
-                    <button onclick="filterLedger('Expense')" id="tab-Expense" class="sub-tab p-2 text-xs font-black uppercase tracking-widest transition-all">Expense Register</button>
+        <!-- STUDENTS TAB -->
+        <div id="students" class="tab-content space-y-8">
+            <div class="flex justify-between items-center flex-wrap gap-6">
+                <h3 class="text-3xl font-black">Student Database</h3>
+                <div class="flex gap-4">
+                    <div class="flex gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+                        <select id="courseFilter" class="p-3 text-xs border-none outline-none font-black bg-slate-50 rounded-xl" onchange="window.updateUI()">
+                            <option value="all">Filter Tracks</option>
+                        </select>
+                        <select id="sortOrder" class="p-3 text-xs border-none outline-none font-black bg-slate-50 rounded-xl" onchange="window.updateUI()">
+                            <option value="name-asc">A-Z Name</option>
+                            <option value="date-desc">Newest Admissions</option>
+                            <option value="due-asc">Upcoming Dues</option>
+                        </select>
+                    </div>
+                    <button onclick="window.openModal('studentModal')" class="bg-blue-600 text-white px-8 py-4 rounded-2xl hover:bg-blue-700 font-black shadow-xl transition-all">
+                        <i class="fas fa-plus mr-2"></i> Enroll Student
+                    </button>
                 </div>
-                <button onclick="window.exportBackup()" class="bg-slate-100 px-4 py-2 rounded-xl text-xs font-black"><i class="fas fa-file-excel mr-2"></i> Export Data</button>
             </div>
-
-            <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100">
-                <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
-                    <table class="w-full text-left ledger-table">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest">Date</th>
-                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest">Particulars / Description</th>
-                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest">Mode</th>
-                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-right">In (+)</th>
-                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-right">Out (-)</th>
-                                <th id="balanceHeader" class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-right bg-blue-50/50">Running Balance</th>
+            <div class="glass-card rounded-[3rem] overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="p-8 font-black text-slate-400 uppercase text-[10px] tracking-widest">Student Profile</th>
+                                <th class="p-8 font-black text-slate-400 uppercase text-[10px] tracking-widest text-center">Cycle Rate</th>
+                                <th class="p-8 font-black text-slate-400 uppercase text-[10px] tracking-widest text-center">Reset Date</th>
+                                <th class="p-8 font-black text-slate-400 uppercase text-[10px] tracking-widest text-center text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="masterLedgerBody"></tbody>
+                        <tbody id="studentTableBody"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- OWNER REGISTRY -->
-        <div id="owner" class="tab-content space-y-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-slate-900 p-10 rounded-[2.5rem] text-white shadow-2xl">
-                    <h4 class="text-2xl font-black mb-6 text-blue-400">Capital & Drawings Register</h4>
-                    <form id="ownerForm" class="space-y-5">
-                        <select id="ownerType" class="w-full p-4 bg-white/10 rounded-2xl outline-none font-bold text-sm">
-                            <option value="Capital">Capital Introduced (e.g. Father/Own money)</option>
-                            <option value="Drawings">Owner Drawings (Taking money out)</option>
-                        </select>
-                        <input type="text" id="ownerParticulars" placeholder="Particulars (e.g. Monthly Support, Personal Chai)" class="w-full p-4 bg-white/10 rounded-2xl outline-none font-bold text-sm" required>
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="number" id="ownerAmount" placeholder="Amount ₹" class="w-full p-4 bg-white/10 rounded-2xl outline-none font-bold text-sm" required>
-                            <select id="ownerMode" class="w-full p-4 bg-white/10 rounded-2xl outline-none font-bold text-sm">
-                                <option value="Cash">Cash</option>
-                                <option value="UPI/Gpay">UPI / GPay</option>
-                                <option value="Bank">Bank</option>
-                            </select>
-                        </div>
-                        <input type="date" id="ownerDate" class="w-full p-4 bg-white/10 rounded-2xl outline-none font-bold text-sm" required>
-                        <button type="submit" class="w-full bg-blue-500 text-white py-5 rounded-2xl font-black shadow-xl hover:bg-blue-600 transition-all">Record in Capital Register</button>
-                    </form>
+        <!-- FEES & LEDGER TAB -->
+        <div id="fees" class="tab-content space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div class="lg:col-span-1 space-y-10">
+                    <div class="glass-card p-10 rounded-[3rem]">
+                        <h4 class="font-black text-xl mb-8 text-blue-600 flex items-center justify-center sm:justify-start gap-3" id="feeFormTitle"><i class="fas fa-cash-register"></i> Digital Ledger Entry</h4>
+                        <form id="feeForm" class="space-y-6 text-center">
+                            <input type="hidden" id="editTransId">
+                            <div id="studentSelectContainer">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Source (Student/Capital)</label>
+                                <select id="feeStudentSelect" class="w-full p-5 bg-slate-50 border-none rounded-2xl mt-2 outline-none font-bold text-sm" required></select>
+                            </div>
+                            <div id="studentNameDisplay" class="hidden">
+                                <p id="editStudentName" class="p-5 bg-blue-50 text-blue-800 rounded-2xl font-black text-sm mt-2 border border-blue-100 text-center"></p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount (₹)</label>
+                                    <input type="number" id="feeAmount" class="w-full p-5 bg-slate-50 border-none rounded-2xl mt-2 outline-none font-bold text-center" required>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</label>
+                                    <select id="feeType" class="w-full p-5 bg-slate-50 border-none rounded-2xl mt-2 outline-none font-bold text-center">
+                                        <option value="Monthly">Monthly Fee</option>
+                                        <option value="Admission">Admission Fee</option>
+                                        <option value="Capital">Owner Capital (In)</option>
+                                        <option value="Advance">Bulk Advance</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Ledger Date</label>
+                                <input type="date" id="feeDate" class="w-full p-5 bg-slate-50 border-none rounded-2xl mt-2 outline-none font-bold text-center" required>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit" id="feeSubmitBtn" class="flex-1 bg-blue-600 text-white py-6 rounded-3xl font-black hover:bg-blue-700 shadow-xl transition-all">Submit Entry</button>
+                                <button type="button" id="cancelFeeEditBtn" onclick="window.resetFeeForm()" class="hidden px-8 bg-slate-200 text-slate-700 rounded-3xl font-black">Esc</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="glass-card p-10 rounded-[3rem] border border-red-50 text-center">
+                        <h4 class="font-black text-xl mb-8 text-red-600 flex items-center justify-center sm:justify-start gap-3" id="expFormTitle"><i class="fas fa-shopping-cart"></i> Expense / Drawing Entry</h4>
+                        <form id="expenseForm" class="space-y-6 text-center">
+                            <input type="hidden" id="editExpId">
+                            <div class="text-center">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Purpose</label>
+                                <input type="text" id="expName" placeholder="Electricity, Salary, Drawing..." class="w-full p-5 bg-slate-50 border-none rounded-2xl mt-2 text-center font-bold" required>
+                            </div>
+                            <div class="text-center">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Register Head</label>
+                                <select id="expCategory" class="w-full p-5 bg-slate-50 border-none rounded-2xl mt-2 text-center font-bold">
+                                    <option value="Essentials">Essentials (35%)</option>
+                                    <option value="Reinvestment">Growth (20%)</option>
+                                    <option value="Drawing">Owner Drawing (Out)</option>
+                                    <option value="Others">Misc</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Amount (₹)</label>
+                                    <input type="number" id="expAmount" class="w-full p-5 bg-slate-50 border-none rounded-2xl mt-2 text-center font-bold" required>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center text-center">Date</label>
+                                    <input type="date" id="expDate" class="w-full p-5 bg-slate-50 border-none rounded-2xl mt-2 text-center font-bold" required>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit" id="expSubmitBtn" class="flex-1 bg-red-500 text-white py-6 rounded-3xl font-black hover:bg-red-600 shadow-xl transition-all">Submit Expense</button>
+                                <button type="button" id="cancelExpEditBtn" onclick="window.resetExpForm()" class="hidden px-8 bg-slate-200 text-slate-700 rounded-3xl font-black">Esc</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="glass-card p-10 rounded-[2.5rem] flex flex-col justify-center space-y-8">
-                    <div class="p-6 bg-blue-50 rounded-3xl">
-                        <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Total Capital Support</p>
-                        <p id="totalCapitalSum" class="text-3xl font-black text-blue-600">₹0</p>
-                    </div>
-                    <div class="p-6 bg-red-50 rounded-3xl">
-                        <p class="text-[10px] font-black text-red-400 uppercase tracking-widest">Total Owner Drawings</p>
-                        <p id="totalDrawingSum" class="text-3xl font-black text-red-600">₹0</p>
-                    </div>
-                    <p class="text-xs text-gray-400 font-medium leading-relaxed italic">
-                        Tip: Maintain this accurately to know exactly how much of your own money is invested in Future U vs. what you take out.
-                    </p>
+                <div class="lg:col-span-2 glass-card p-10 rounded-[3rem] h-[850px] overflow-y-auto custom-scrollbar text-center">
+                    <h4 class="font-black text-xl mb-10 text-center sm:text-left">Comprehensive Master Ledger (Last 50)</h4>
+                    <div id="transactionList" class="space-y-6"></div>
                 </div>
             </div>
         </div>
 
-        <!-- STUDENTS -->
-        <div id="students" class="tab-content space-y-6">
-            <div class="flex justify-between items-center">
-                <h3 class="text-xl font-black">Admissions</h3>
-                <button onclick="openModal('studentModal')" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-black shadow-lg"><i class="fas fa-plus mr-2"></i> New Admission</button>
-            </div>
-            <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest">Student</th>
-                            <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest">Course</th>
-                            <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest">Next Due</th>
-                            <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentTableBody"></tbody>
-                </table>
+        <!-- reports tab -->
+        <div id="reports" class="tab-content space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 text-center">
+                <div class="glass-card p-10 rounded-[3rem]">
+                    <h4 class="font-black text-lg mb-8 flex items-center justify-center sm:justify-start gap-3"><i class="fas fa-chart-pie text-indigo-500 mr-2"></i> Track Revenue Split</h4>
+                    <canvas id="coursePieChart" class="w-full max-h-[350px] mx-auto"></canvas>
+                </div>
+                <div class="glass-card p-10 rounded-[3rem]">
+                    <h4 class="font-black text-lg mb-8 flex items-center justify-center sm:justify-start gap-3"><i class="fas fa-hand-holding-dollar text-green-500 mr-2"></i> Income vs Expense</h4>
+                    <canvas id="cashFlowChart" class="w-full max-h-[350px]"></canvas>
+                </div>
             </div>
         </div>
-        
-        <div id="reports" class="tab-content">Reports logic integrated into Dashboard.</div>
 
+        <!-- roadmap -->
+        <div id="growth" class="tab-content space-y-8">
+            <div class="lg:max-w-4xl mx-auto glass-card p-12 rounded-[4rem] border-b-[12px] border-blue-600 text-center">
+                <h4 class="text-4xl font-black mb-12">Vision 2026-2027 Goals</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-slate-400 uppercase text-xs font-black border-b tracking-widest text-center">
+                                <th class="pb-10">Target Month</th>
+                                <th class="pb-10 text-center">Target Students</th>
+                                <th class="pb-10 text-center">Actual Enrolled</th>
+                                <th class="pb-10 text-right">Result</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performanceBody" class="text-center"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <!-- Modal -->
-    <div id="studentModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[100] p-4 backdrop-blur-xl">
-        <div class="bg-white w-full max-w-xl rounded-[2.5rem] p-10 relative">
-            <button onclick="closeModal('studentModal')" class="absolute top-8 right-8 text-2xl font-black">&times;</button>
-            <h3 class="text-2xl font-black mb-8">Admission Registry</h3>
-            <form id="enrollmentForm" class="space-y-4">
-                <input type="text" id="stuName" placeholder="Student Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required>
-                <input type="text" id="stuCourse" placeholder="Course Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required>
-                <input type="text" id="stuPhone" placeholder="Mobile Number" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="stuMlyFee" placeholder="Monthly Fee ₹" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required>
-                    <input type="date" id="stuDueDate" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-sm" required>
+    <!-- Student Detail Modal -->
+    <div id="studentModal" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center z-[100] p-4 lg:p-10 backdrop-blur-xl">
+        <div class="bg-white w-full max-w-6xl rounded-[4rem] shadow-2xl relative overflow-hidden flex flex-col max-h-[95vh] text-center sm:text-left">
+            <div class="p-8 lg:p-14 overflow-y-auto w-full text-center sm:text-left">
+                <button onclick="window.closeModal('studentModal')" class="absolute top-10 right-10 text-slate-300 hover:text-slate-800 text-5xl font-light transition-all text-center">&times;</button>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 text-center sm:text-left">
+                    <!-- Left Profile -->
+                    <div class="lg:col-span-4 border-r border-slate-50 pr-4 lg:pr-14 text-center lg:text-left flex flex-col items-center">
+                        <div class="w-32 h-32 bg-slate-100 rounded-[3.5rem] overflow-hidden shadow-inner mb-6 text-center">
+                            <img id="profileImg" src="https://via.placeholder.com/150?text=U" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-3xl font-black text-slate-800 mt-8 tracking-tighter text-center" id="studentModalTitle">Admission Registry</h3>
+                        <span class="mt-4 px-5 py-2 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100 text-center" id="profileStatusBadge">Inactive</span>
+
+                        <form id="enrollmentForm" class="space-y-6 w-full mt-10">
+                            <input type="hidden" id="editStudentId">
+                            <div class="text-center">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Student Name</label>
+                                <input type="text" id="stuName" class="w-full p-5 bg-slate-50 border-none rounded-3xl font-bold text-center" required>
+                            </div>
+                            <div class="text-center">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center text-center">Photo URL (WhatsApp Link)</label>
+                                <input type="text" id="stuImgUrl" class="w-full p-5 bg-slate-50 border-none rounded-3xl font-bold text-center" placeholder="https://...">
+                            </div>
+                            <div class="text-center">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Course Track</label>
+                                <select id="stuCourse" class="w-full p-5 bg-slate-50 border-none rounded-3xl font-bold text-sm text-center" required></select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Rate (₹)</label>
+                                    <input type="number" id="stuMlyFee" class="w-full p-5 bg-slate-50 border-none rounded-3xl font-bold text-center" required>
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Joined</label>
+                                    <input type="date" id="stuDate" class="w-full p-5 bg-slate-50 border-none rounded-3xl font-bold text-center text-center" required onchange="window.handleJoiningDateChange(this.value)">
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Billing Deadline</label>
+                                <input type="date" id="stuDueDate" class="w-full p-5 bg-slate-50 border-none rounded-3xl font-bold text-center" required>
+                            </div>
+                            <div class="text-center">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center text-center">Contact Mobile</label>
+                                <input type="text" id="stuPhone" class="w-full p-5 bg-slate-50 border-none rounded-3xl font-bold text-center text-center" required>
+                            </div>
+                            <button type="submit" id="studentSubmitBtn" class="w-full bg-slate-900 text-white py-6 rounded-3xl font-black hover:bg-slate-800 shadow-xl transition-all text-center">Confirm Data</button>
+                        </form>
+                    </div>
+
+                    <div id="studentHistoryPanel" class="lg:col-span-8 flex flex-col h-full hidden text-center">
+                        <div class="grid grid-cols-3 gap-8 mb-12 text-center">
+                            <div class="p-8 bg-slate-50 rounded-[3rem] border border-slate-100 text-center">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 text-center">Account Paid</p>
+                                <p class="text-4xl font-black text-slate-800 text-center" id="stuTotalPaid">₹0</p>
+                            </div>
+                            <div class="p-8 bg-slate-50 rounded-[3rem] border border-slate-100 text-center">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 text-center text-center">Cycle Status</p>
+                                <p class="text-xs font-black uppercase text-center mt-3 text-center text-center" id="stuDueStatusLabel"></p>
+                            </div>
+                            <div class="p-8 bg-blue-600 rounded-[3rem] shadow-2xl text-white flex items-center justify-center text-center">
+                                <button onclick="window.quickAddFeeFromProfile()" class="flex flex-col items-center gap-3 hover:scale-110 transition-transform text-center">
+                                    <i class="fas fa-cash-register text-3xl text-center"></i>
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-center">Receipt Desk</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex-1 flex flex-col text-center">
+                            <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-10 flex items-center justify-center gap-6 text-center text-center">
+                                <span class="w-16 h-[1px] bg-slate-100 text-center"></span> ACCOUNT TIMELINE <span class="w-16 h-[1px] bg-slate-100 text-center"></span>
+                            </h4>
+                            <div class="overflow-y-auto space-y-6 pr-6 custom-scrollbar text-center text-center" id="stuPaymentHistoryList"></div>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black shadow-xl">Enroll & Record Admission</button>
-            </form>
+            </div>
         </div>
     </div>
 
-    <!-- Notification -->
-    <div id="notif" class="fixed bottom-10 right-10 bg-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold hidden z-[500] animate-bounce"></div>
-
+    <!-- Firebase System -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, addDoc, getDoc, collection, onSnapshot, query, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyB2bcDcHkL7mtu8Hy_XsrrCnJ1TRfzJNyc", authDomain: "futureuerp.firebaseapp.com", projectId: "futureuerp", storageBucket: "futureuerp.firebasestorage.app", messagingSenderId: "199842262718", appId: "1:199842262718:web:553ca10bb5da77656478ef" };
+        // 1. CONSTANTS (TOP PRIORITY)
+        const COURSE_LIST = ["DIFA– Diploma in Indian and Foreign Accounting", "PDIFA– Professional Diploma in Indian & Foreign Accounting", "DFA– Diploma in Financial Accounting", "PGDCA– Post Graduate Diploma in Computer Application", "DCA–Diploma in Computer Application", "DOM–Diploma in Office Management", "Graphic Designing + Digital Marketing", "NIOS", "Vacation Course", "JAVA Programming", "PYTHON Programming", "HTML", "Zoho Books", "Tally Prime", "Adobe Photoshop", "Adobe PageMaker", "Adobe InDesign", "Microsoft Excel", "Microsoft Office Suite", "PSC Coaching", "SSC Coaching", "RRB Coaching", "SSC + RRB Coaching", "Reading Room / Study Centre Access"];
+        const TARGETS = [{m:"Jan",y:2026,t:25},{m:"Feb",y:2026,t:40},{m:"Mar",y:2026,t:60},{m:"Apr",y:2026,t:80},{m:"May",y:2026,t:100},{m:"Dec",y:2026,t:250},{m:"Dec",y:2027,t:500}];
+        const MONTH_MAP = { "Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "May": 4, "Jun": 5, "Jul": 6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11 };
+
+        // 2. STATE & FIREBASE
+        const firebaseConfig = { apiKey: "AIzaSyB2bcDcHkL7mtu8Hy_XsrrCnJ1TRfzJNyc", authDomain: "futureuerp.firebaseapp.com", projectId: "futureuerp", storageBucket: "futureuerp.firebasestorage.app", messagingSenderId: "199842262718", appId: "1:199842262718:web:553ca10bb5da77656478ef", measurementId: "G-WHXM1VDGZY" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'futureuerp';
 
-        let appState = {
-            students: [],
-            transactions: [],
-            currentFilter: 'all',
-            user: null,
-            adminPin: '4568',
-            isAuthenticated: false,
-            currentInputPin: '',
-            targetTab: 'dashboard'
-        };
+        let appState = { students: [], transactions: [], expenses: [], user: null, adminPin: '4568', isAuthenticated: false, currentInputPin: '', targetTab: 'dashboard' };
+        let charts = { revenue: null, cashFlow: null, course: null };
 
-        const showNotif = (msg) => {
-            const n = document.getElementById('notif');
-            n.innerText = msg; n.classList.remove('hidden');
-            setTimeout(() => n.classList.add('hidden'), 3000);
-        };
+        // 3. UI HELPERS
+        function safeSetText(id, text) { const el = document.getElementById(id); if (el) el.innerText = text; }
+        function safeSetHTML(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+        function showNotif(msg) { const n = document.getElementById('notif'); if (n) { n.innerText = msg; n.classList.remove('hidden'); setTimeout(() => n.classList.add('hidden'), 3000); } }
 
-        const updateUI = () => {
-            const today = new Date();
-            const sortedTx = [...appState.transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            let runningBalance = 0;
-            let ledgerHtml = '';
-            let busRevenue = 0;
-            let busExpense = 0;
-            let capitalSum = 0;
-            let drawingSum = 0;
-
-            const filteredTx = sortedTx.filter(tx => appState.currentFilter === 'all' || tx.category === appState.currentFilter);
-
-            sortedTx.forEach(tx => {
-                const amt = Number(tx.amount);
-                const isPositive = (tx.category === 'Fee' || tx.category === 'Capital');
-                
-                if (isPositive) {
-                    runningBalance += amt;
-                    if(tx.category === 'Fee') busRevenue += amt;
-                    if(tx.category === 'Capital') capitalSum += amt;
-                } else {
-                    runningBalance -= amt;
-                    if(tx.category === 'Expense') busExpense += amt;
-                    if(tx.category === 'Drawings') drawingSum += amt;
-                }
-
-                // If this transaction is in our active filter, add to table
-                if (appState.currentFilter === 'all' || tx.category === appState.currentFilter) {
-                    ledgerHtml += `
-                        <tr class="text-xs border-b hover:bg-gray-50/50">
-                            <td class="p-6 font-bold text-gray-500">${tx.date}</td>
-                            <td class="p-6"><p class="font-black text-slate-800">${tx.particulars}</p><p class="text-[9px] uppercase font-bold text-gray-400">${tx.head || tx.category}</p></td>
-                            <td class="p-6 font-bold text-gray-400 uppercase text-[9px]">${tx.mode}</td>
-                            <td class="p-6 text-right font-black ${isPositive ? 'in-cell' : 'text-gray-200'}">${isPositive ? '+' + amt.toLocaleString() : '-'}</td>
-                            <td class="p-6 text-right font-black ${!isPositive ? 'out-cell' : 'text-gray-200'}">${!isPositive ? '-' + amt.toLocaleString() : '-'}</td>
-                            <td class="p-6 text-right font-black ${appState.currentFilter === 'all' ? 'bg-blue-50/30' : 'text-gray-300'}">${appState.currentFilter === 'all' ? '₹' + runningBalance.toLocaleString() : '---'}</td>
-                        </tr>
-                    `;
-                }
-            });
-
-            document.getElementById('masterLedgerBody').innerHTML = ledgerHtml || '<tr><td colspan="6" class="p-20 text-center text-gray-400 italic">Register is currently empty.</td></tr>';
-            document.getElementById('totalCashBalance').innerText = `₹${runningBalance.toLocaleString()}`;
-            document.getElementById('statProfit').innerText = `₹${(busRevenue - busExpense).toLocaleString()}`;
-            document.getElementById('statActive').innerText = appState.students.length;
-            document.getElementById('statOverdue').innerText = appState.students.filter(s => new Date(s.nextDueDate) < today).length;
-            document.getElementById('visionPercent').innerText = Math.round((appState.students.length / 500) * 100) + '%';
-            
-            document.getElementById('totalCapitalSum').innerText = `₹${capitalSum.toLocaleString()}`;
-            document.getElementById('totalDrawingSum').innerText = `₹${drawingSum.toLocaleString()}`;
-
-            // Sync Dropdown
-            document.getElementById('feeStudentSelect').innerHTML = '<option value="">Select Student...</option>' + 
-                appState.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-
-            // Student Table
-            document.getElementById('studentTableBody').innerHTML = appState.students.map(s => `
-                <tr class="border-b text-sm">
-                    <td class="p-6 font-bold">${s.name}</td>
-                    <td class="p-6 text-gray-500 font-medium">${s.course}</td>
-                    <td class="p-6"><span class="px-2 py-1 rounded font-black text-[10px] ${new Date(s.nextDueDate) < today ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${s.nextDueDate}</span></td>
-                    <td class="p-6 text-right"><button onclick="window.deleteStudent('${s.id}')" class="text-red-200 hover:text-red-500"><i class="fas fa-trash"></i></button></td>
-                </tr>
-            `).join('');
-        };
-
-        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
-        window.openModal = (id) => document.getElementById(id).style.display = 'flex';
-        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-
-        window.filterLedger = (filter) => {
-            appState.currentFilter = filter;
-            document.querySelectorAll('.sub-tab').forEach(el => el.classList.remove('active'));
-            document.getElementById(`tab-${filter}`).classList.add('active');
-            document.getElementById('balanceHeader').classList.toggle('bg-blue-50/50', filter === 'all');
-            updateUI();
-        };
-
-        window.showTab = (tabId) => {
-            const secretTabs = ['ledger', 'owner'];
-            if (secretTabs.includes(tabId) && !appState.isAuthenticated) {
-                appState.targetTab = tabId;
-                document.getElementById('pinOverlay').classList.remove('hidden');
-                return;
+        function updateCharts() {
+            const chartConfig = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+            const ctxRev = document.getElementById('revenueChart')?.getContext('2d');
+            if(ctxRev) {
+                const months = ["Jan", "Feb", "Mar"];
+                const data = months.map(m => appState.transactions.filter(t => isPeriodMatch(t.paidDate, MONTH_MAP[m], 2026)).reduce((a,b)=>a+Number(b.amount),0));
+                if(charts.revenue) charts.revenue.destroy();
+                charts.revenue = new Chart(ctxRev, { type: 'line', data: { labels: months, datasets: [{ data: data, borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)' }] }, options: chartConfig });
             }
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.toggle('active', el.getAttribute('onclick').includes(tabId)));
-            document.getElementById('pageTitle').innerText = tabId === 'ledger' ? "Digital Registers" : (tabId.charAt(0).toUpperCase() + tabId.slice(1));
-            updateUI();
-        };
 
-        window.pressPin = (num) => {
-            if (appState.currentInputPin.length < 4) {
-                appState.currentInputPin += num;
-                [1,2,3,4].forEach(i => document.getElementById(`pin-${i}`).classList.toggle('bg-blue-500', appState.currentInputPin.length >= i));
-                if (appState.currentInputPin.length === 4) {
-                    if (appState.currentInputPin === appState.adminPin) {
-                        appState.isAuthenticated = true;
-                        document.getElementById('pinOverlay').classList.add('hidden');
-                        window.showTab(appState.targetTab);
-                    } else {
-                        showNotif("Invalid Pin");
-                        appState.currentInputPin = '';
-                        [1,2,3,4].forEach(i => document.getElementById(`pin-${i}`).classList.remove('bg-blue-500'));
-                    }
-                }
+            const ctxPie = document.getElementById('coursePieChart')?.getContext('2d');
+            if(ctxPie) {
+                const courseCounts = {};
+                appState.students.forEach(s => { courseCounts[s.course] = (courseCounts[s.course] || 0) + 1; });
+                if(charts.course) charts.course.destroy();
+                charts.course = new Chart(ctxPie, { type: 'doughnut', data: { labels: Object.keys(courseCounts), datasets: [{ data: Object.values(courseCounts), backgroundColor: ['#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#ef4444'] }] }, options: { ...chartConfig, cutout: '75%', plugins: { legend: { display: true, position: 'bottom' } } } });
             }
-        };
-        window.clearPin = () => { appState.currentInputPin = ''; [1,2,3,4].forEach(i => document.getElementById(`pin-${i}`).classList.remove('bg-blue-500')); };
-        window.cancelPin = () => { document.getElementById('pinOverlay').classList.add('hidden'); clearPin(); };
 
-        // Submits
-        document.getElementById('feeForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const sId = document.getElementById('feeStudentSelect').value;
-            const student = appState.students.find(s => s.id === sId);
-            const amt = Number(document.getElementById('feeAmount').value);
-            const date = document.getElementById('feeDate').value;
-            const mode = document.getElementById('feeMode').value;
-            const rec = document.getElementById('feeReceipt').value;
-
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), {
-                category: 'Fee', particulars: `Fees - ${student.name}`, amount: amt, date: date, mode: mode, head: 'Fee Income', studentId: sId, receipt: rec
-            });
-            
-            const nextDue = new Date(student.nextDueDate);
-            nextDue.setMonth(nextDue.getMonth() + 1);
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', sId), { nextDueDate: nextDue.toISOString().split('T')[0] });
-            
-            showNotif("Income Register Updated!");
-            e.target.reset();
-        });
-
-        document.getElementById('expenseForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), {
-                category: 'Expense', particulars: document.getElementById('expName').value, head: document.getElementById('expHead').value, amount: Number(document.getElementById('expAmount').value), mode: document.getElementById('expMode').value, date: document.getElementById('expDate').value, operator: document.getElementById('expPaidBy').value
-            });
-            showNotif("Expense Register Updated!");
-            e.target.reset();
-        });
-
-        document.getElementById('ownerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), {
-                category: document.getElementById('ownerType').value, particulars: document.getElementById('ownerParticulars').value, amount: Number(document.getElementById('ownerAmount').value), mode: document.getElementById('ownerMode').value, date: document.getElementById('ownerDate').value
-            });
-            showNotif("Owner Entry Recorded!");
-            e.target.reset();
-        });
-
-        document.getElementById('enrollmentForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), {
-                name: document.getElementById('stuName').value, course: document.getElementById('stuCourse').value, phone: document.getElementById('stuPhone').value, mlyFee: Number(document.getElementById('stuMlyFee').value), nextDueDate: document.getElementById('stuDueDate').value
-            });
-            showNotif("New Admission Success!");
-            closeModal('studentModal');
-            e.target.reset();
-        });
-
-        window.deleteStudent = async (id) => { if(confirm("Permanently remove student?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id)); };
-        
-        window.exportBackup = () => {
-            const data = { transactions: appState.transactions, students: appState.students };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `FutureU_Ledger_Backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
-        };
-
-        async function init() {
-            await signInAnonymously(auth);
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    appState.user = user;
-                    document.getElementById('loadingOverlay').style.opacity = '0';
-                    setTimeout(() => document.getElementById('loadingOverlay').style.display = 'none', 500);
-                    
-                    onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snap) => {
-                        appState.students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                        updateUI();
-                    });
-                    onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), (snap) => {
-                        appState.transactions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                        updateUI();
-                    });
-                }
-            });
-            document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-            const todayStr = new Date().toISOString().split('T')[0];
-            ['feeDate', 'expDate', 'ownerDate', 'stuDueDate'].forEach(id => {
-                const el = document.getElementById(id); if(el) el.value = todayStr;
-            });
+            const ctxFlow = document.getElementById('cashFlowChart')?.getContext('2d');
+            if(ctxFlow) {
+                const months = ["Jan", "Feb", "Mar"];
+                const inData = months.map(m => appState.transactions.filter(t => isPeriodMatch(t.paidDate, MONTH_MAP[m], 2026)).reduce((a,b)=>a+Number(b.amount),0));
+                const outData = months.map(m => appState.expenses.filter(e => isPeriodMatch(e.date, MONTH_MAP[m], 2026)).reduce((a,b)=>a+Number(b.amount),0));
+                if(charts.cashFlow) charts.cashFlow.destroy();
+                charts.cashFlow = new Chart(ctxFlow, { type: 'bar', data: { labels: months, datasets: [{ label: 'Income', data: inData, backgroundColor: '#22c55e' }, { label: 'Expense', data: outData, backgroundColor: '#ef4444' }] }, options: { ...chartConfig, plugins: { legend: { display: true } } } });
+            }
         }
 
-        init().catch(console.error);
+        function updateUI() {
+            const today = new Date();
+            const currMoIdx = today.getMonth();
+            const currYr = today.getFullYear();
+            
+            // 1. Dashboard Calculations
+            const totalFees = appState.transactions.filter(t=>t.type !== 'Capital').reduce((a,b)=>a+Number(b.amount), 0);
+            const totalCapital = appState.transactions.filter(t=>t.type === 'Capital').reduce((a,b)=>a+Number(b.amount), 0);
+            const totalOut = appState.expenses.reduce((a,b)=>a+Number(b.amount), 0);
+            const cashBalance = (totalFees + totalCapital) - totalOut;
+
+            safeSetText('statCashInHand', `₹${cashBalance.toLocaleString()}`);
+            safeSetText('statActive', appState.students.filter(s=>s.status==='Active').length);
+            safeSetText('statOverdue', appState.students.filter(s=>new Date(s.nextDueDate) < today && s.status==='Active').length);
+            safeSetText('statRevenue', `₹${totalFees.toLocaleString()}`);
+
+            const monthlyRev = appState.transactions.filter(t => isPeriodMatch(t.paidDate, currMoIdx, currYr) && t.type !== 'Capital').reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            const monthlyExp = appState.expenses.filter(e => isPeriodMatch(e.date, currMoIdx, currYr)).reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            safeSetText('statProfit', `₹${(monthlyRev - monthlyExp).toLocaleString()}`);
+            safeSetText('statMonthlyRev', `In: ₹${monthlyRev.toLocaleString()}`);
+            safeSetText('statMonthlyExp', `Out: ₹${monthlyExp.toLocaleString()}`);
+
+            safeSetText('visionProgressText', `${appState.students.filter(s=>s.status==='Active').length} / 500`);
+            const bar = document.getElementById('visionBar'); if (bar) bar.style.width = Math.min((appState.students.filter(s=>s.status==='Active').length / 500) * 100, 100) + '%';
+
+            // RESTORE Dashboard Course Performance
+            const courseStats = {};
+            appState.transactions.filter(t => isPeriodMatch(t.paidDate, currMoIdx, currYr) && t.type !== 'Capital').forEach(t => {
+                const s = appState.students.find(stu => stu.id === t.studentId);
+                const c = s ? s.course : 'Non-Student';
+                courseStats[c] = (courseStats[c] || 0) + Number(t.amount);
+            });
+            const sortedCourses = Object.entries(courseStats).sort((a,b)=>b[1]-a[1]);
+            safeSetHTML('dashCourseList', sortedCourses.map(([name, amt]) => `
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs font-black uppercase tracking-widest"><span>${name}</span><span>₹${amt.toLocaleString()}</span></div>
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"><div class="h-full bg-blue-600" style="width: ${Math.min((amt/monthlyRev)*100 || 0, 100)}%"></div></div>
+                </div>
+            `).join('') || '<p class="text-xs text-slate-300 italic font-bold">No income logged in current cycle.</p>');
+
+            // RESTORE Student Table
+            const cFilter = document.getElementById('courseFilter')?.value || 'all';
+            const sOrder = document.getElementById('sortOrder')?.value || 'name-asc';
+            let displayStudents = [...appState.students];
+            if(cFilter !== 'all') displayStudents = displayStudents.filter(s => s.course === cFilter);
+            displayStudents.sort((a,b) => {
+                if(sOrder === 'name-asc') return a.name.localeCompare(b.name);
+                if(sOrder === 'date-desc') return new Date(b.date) - new Date(a.date);
+                if(sOrder === 'due-asc') return new Date(a.nextDueDate) - new Date(b.nextDueDate);
+                return 0;
+            });
+
+            safeSetHTML('studentTableBody', displayStudents.map(s => `
+                <tr class="border-b hover:bg-slate-50/50 transition-all text-sm">
+                    <td class="p-8"><div class="flex items-center gap-5"><img src="${s.imgUrl || 'https://via.placeholder.com/150?text=U'}" class="w-12 h-12 rounded-2xl shadow-inner border border-slate-100 object-cover"><div><p class="font-black text-slate-800 text-left">${s.name}</p><p class="text-[9px] text-slate-400 font-bold uppercase text-left">${s.course}</p></div></div></td>
+                    <td class="p-8 font-black text-blue-600 text-center text-center">₹${s.mlyFee}</td>
+                    <td class="p-8 text-center text-center font-bold text-slate-500">${s.nextDueDate}</td>
+                    <td class="p-8 text-center text-center"><span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">${s.status}</span></td>
+                    <td class="p-8 flex gap-2 justify-end text-right">
+                        <button onclick="window.editStudent('${s.id}')" class="p-3 bg-white rounded-xl text-slate-300 hover:text-blue-600 shadow-sm transition-all"><i class="fas fa-edit"></i></button>
+                        <button onclick="window.deleteStudent('${s.id}')" class="p-3 bg-white rounded-xl text-slate-300 hover:text-red-500 shadow-sm transition-all"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join(''));
+
+            // RESTORE Ledger history
+            const allHistory = [...appState.transactions.map(t => ({ ...t, kind: 'fee' })), ...appState.expenses.map(e => ({ ...e, kind: 'exp', paidDate: e.date, studentName: e.name }))].sort((a,b) => new Date(b.paidDate) - new Date(a.paidDate));
+            safeSetHTML('transactionList', allHistory.slice(0, 50).map(item => `
+                <div class="flex justify-between items-center p-6 rounded-3xl border ${item.kind === 'fee' ? 'bg-green-50/20 border-green-100' : 'bg-red-50/20 border-red-100'}">
+                    <div class="flex-1 text-left"><p class="font-black text-slate-800 text-sm text-left">${item.studentName}</p><p class="text-[9px] text-gray-400 font-bold uppercase mt-1 text-left">${item.paidDate} • ${item.kind === 'fee' ? (item.type === 'Capital' ? 'Capital Deposit' : 'Fee Receipt') : 'Cash Payment'}</p></div>
+                    <div class="flex items-center gap-6"><p class="font-black text-sm ${item.kind === 'fee' ? 'text-green-600' : 'text-red-600'}">₹${item.amount}</p>
+                    <div class="flex gap-1"><button onclick="window.editEntry('${item.id}', '${item.kind}')" class="p-2 bg-white rounded-lg text-slate-300 hover:text-blue-500 shadow-sm"><i class="fas fa-edit text-[10px]"></i></button>
+                    <button onclick="window.deleteEntry('${item.id}', '${item.kind}')" class="p-2 bg-white rounded-lg text-slate-300 hover:text-red-500 shadow-sm"><i class="fas fa-trash text-[10px]"></i></button></div></div>
+                </div>
+            `).join(''));
+
+            // Roadmap
+            safeSetHTML('performanceBody', TARGETS.map(target => {
+                const admissionsCount = appState.students.filter(s => { if (!s.date) return false; const [y, mo] = s.date.split('-'); return MONTH_MAP[target.m] === Number(mo)-1 && y === String(target.y); }).length;
+                return `<tr class="border-b border-gray-50"><td class="py-8 font-black text-left">${target.m} ${target.y}</td><td class="py-8 font-bold text-slate-400 text-center">${target.t} Target</td><td class="py-8 font-black text-center">${admissionsCount} Real</td><td class="py-8 text-right"><span class="px-3 py-1.5 rounded-full text-[10px] font-black ${admissionsCount >= target.t ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'} uppercase">${admissionsCount >= target.t ? 'Success' : 'Ongoing'}</span></td></tr>`;
+            }).join(''));
+
+            const feeSelect = document.getElementById('feeStudentSelect');
+            if(feeSelect) feeSelect.innerHTML = '<option value="">Choose Payer...</option><option value="OWNER-CAP">Add Owner Capital</option>' + appState.students.filter(s=>s.status==='Active').map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+            updateCharts();
+        }
+
+        // --- 4. EXPOSED GLOBALS ---
+        window.openModal = (id) => { const el = document.getElementById(id); if (el) el.style.display = 'flex'; };
+        window.closeModal = (id) => { const el = document.getElementById(id); if (el) el.style.display = 'none'; if(id === 'studentModal') resetStudentModal(); };
+        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); };
+        window.pressPin = (num) => { if(appState.currentInputPin.length < 4) { appState.currentInputPin += num; updatePinVisuals(); if(appState.currentInputPin.length === 4) validatePin(); } };
+        window.clearPin = () => { appState.currentInputPin = ''; updatePinVisuals(); };
+        window.cancelPin = () => { clearPin(); document.getElementById('pinOverlay').classList.add('hidden'); };
+        const updatePinVisuals = () => { for(let i = 1; i <= 4; i++) { const dot = document.getElementById(`pin-${i}`); if(dot) { if(appState.currentInputPin.length >= i) dot.classList.add('bg-blue-500', 'border-blue-500', 'scale-125'); else dot.classList.remove('bg-blue-500', 'border-blue-500', 'scale-125'); } } };
+        const validatePin = () => { if(appState.currentInputPin === appState.adminPin) { appState.isAuthenticated = true; showNotif("AUTHORIZED"); document.getElementById('pinOverlay').classList.add('hidden'); window.showTab(appState.targetTab); clearPin(); } else { showNotif("DENIED"); clearPin(); } };
+
+        window.handleJoiningDateChange = (val) => { if(!val) return; const date = new Date(val); date.setDate(date.getDate() + 30); const dueInp = document.getElementById('stuDueDate'); if(dueInp) dueInp.value = date.toISOString().split('T')[0]; };
+
+        window.showTab = (tabId) => {
+            if((tabId === 'reports' || tabId === 'growth' || tabId === 'financials') && !appState.isAuthenticated) {
+                appState.targetTab = tabId; document.getElementById('pinOverlay').classList.remove('hidden'); return;
+            }
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            const targetEl = document.getElementById(tabId); if (targetEl) targetEl.classList.add('active');
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.toggle('active', el.getAttribute('onclick').includes(tabId)));
+            updateUI();
+        };
+
+        window.editStudent = (id) => {
+            const s = appState.students.find(stu => stu.id === id);
+            if (!s) return;
+            document.getElementById('editStudentId').value = id;
+            document.getElementById('stuName').value = s.name;
+            document.getElementById('stuImgUrl').value = s.imgUrl || '';
+            document.getElementById('profileImg').src = s.imgUrl || 'https://via.placeholder.com/150?text=U';
+            document.getElementById('stuCourse').value = s.course;
+            document.getElementById('stuMlyFee').value = s.mlyFee;
+            document.getElementById('stuPhone').value = s.phone || '';
+            document.getElementById('stuDate').value = s.date;
+            document.getElementById('stuDueDate').value = s.nextDueDate;
+            document.getElementById('studentModalTitle').innerText = `${s.name}'s Profile`;
+            document.getElementById('studentHistoryPanel').classList.remove('hidden');
+            const isOverdue = new Date(s.nextDueDate) < new Date();
+            document.getElementById('profileStatusBadge').innerText = s.status;
+            safeSetText('stuTotalPaid', `₹${(s.totalPaid || 0).toLocaleString()}`);
+            safeSetHTML('stuDueStatusLabel', `<span class="${isOverdue ? 'text-red-500' : 'text-green-500'} font-black text-center">${isOverdue ? 'Overdue' : 'Cycle Clear'}</span>`);
+            const history = appState.transactions.filter(t => t.studentId === id).sort((a,b) => new Date(b.paidDate) - new Date(a.paidDate));
+            safeSetHTML('stuPaymentHistoryList', history.map(t => `<div class="flex justify-between items-center p-6 bg-slate-50 rounded-[2.5rem] border border-slate-100 text-center"><div><p class="text-[10px] font-black text-slate-800 uppercase tracking-widest text-left">${t.type}</p><p class="text-[8px] text-slate-400 font-bold uppercase mt-1 text-left">${t.paidDate}</p></div><div class="flex items-center gap-4 text-center"><p class="text-sm font-black text-slate-800">₹${t.amount}</p><button onclick="window.editEntry('${t.id}', 'fee')" class="text-slate-300 hover:text-blue-600"><i class="fas fa-edit"></i></button></div></div>`).join('') || '<p class="text-xs text-slate-300 italic text-center py-10 font-bold">No payments found.</p>');
+            window.openModal('studentModal');
+        };
+
+        window.editEntry = (id, kind) => {
+            const list = kind === 'fee' ? appState.transactions : appState.expenses;
+            const item = list.find(i => i.id === id);
+            if (!item) return;
+            if(kind === 'fee') {
+                document.getElementById('editTransId').value = id;
+                document.getElementById('feeAmount').value = item.amount;
+                document.getElementById('feeType').value = item.type;
+                document.getElementById('feeDate').value = item.paidDate;
+                document.getElementById('feeFormTitle').innerHTML = '<i class="fas fa-edit"></i> Correction Mode';
+                document.getElementById('studentSelectContainer').classList.add('hidden');
+                document.getElementById('studentNameDisplay').classList.remove('hidden');
+                document.getElementById('editStudentName').innerText = item.studentName;
+                document.getElementById('cancelFeeEditBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('editExpId').value = id;
+                document.getElementById('expName').value = item.name;
+                document.getElementById('expAmount').value = item.amount;
+                document.getElementById('expCategory').value = item.category || 'Essentials';
+                document.getElementById('expDate').value = item.date;
+                document.getElementById('expFormTitle').innerHTML = '<i class="fas fa-edit"></i> Adjust Expense';
+                document.getElementById('cancelExpEditBtn').classList.remove('hidden');
+            }
+            window.closeModal('studentModal');
+            showTab('fees');
+        };
+
+        window.recalculateBalances = async () => {
+            showNotif("Integrity Scan...");
+            const results = {};
+            appState.transactions.forEach(t => { if(t.studentId) results[t.studentId] = (results[t.studentId] || 0) + Number(t.amount); });
+            for(let sid in results) { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', sid), { totalPaid: results[sid] }); }
+            showNotif("System Corrected.");
+        };
+
+        window.deleteStudent = async (id) => { if (confirm("Delete permanent?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id)); };
+        window.deleteEntry = async (id, kind) => { if (confirm("Delete record?")) { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', kind==='fee'?'transactions':'expenses', id)); if(kind==='fee') window.recalculateBalances(); } };
+        window.updatePin = async () => { const pin = document.getElementById('newPin').value; if(pin.length !== 4) return; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin'), { pin }); showNotif("PIN UPDATED"); document.getElementById('newPin').value = ''; };
+        window.exportBackup = () => { const data = { students: appState.students, transactions: appState.transactions, expenses: appState.expenses }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `Backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); };
+        window.quickAddFeeFromProfile = () => { const sid = document.getElementById('editStudentId').value; window.closeModal('studentModal'); window.showTab('fees'); setTimeout(() => { const sel = document.getElementById('feeStudentSelect'); if(sel) { sel.value = sid; document.getElementById('feeAmount').value = appState.students.find(s=>s.id===sid).mlyFee; } }, 100); };
+        window.resetFeeForm = () => { document.getElementById('editTransId').value = ''; document.getElementById('feeForm').reset(); document.getElementById('feeFormTitle').innerHTML = '<i class="fas fa-wallet text-center"></i> Payment Receipt'; document.getElementById('studentSelectContainer').classList.remove('hidden'); document.getElementById('studentNameDisplay').classList.add('hidden'); document.getElementById('cancelFeeEditBtn').classList.add('hidden'); };
+        window.resetExpForm = () => { document.getElementById('editExpId').value = ''; document.getElementById('expenseForm').reset(); document.getElementById('expFormTitle').innerHTML = '<i class="fas fa-shopping-basket text-center"></i> Expense Registry'; document.getElementById('cancelExpEditBtn').classList.add('hidden'); };
+
+        const resetStudentModal = () => {
+            const sidInp = document.getElementById('editStudentId'); if(sidInp) sidInp.value = '';
+            const eForm = document.getElementById('enrollmentForm'); if(eForm) eForm.reset();
+            safeSetText('studentModalTitle', "Admission Entry");
+            const pan = document.getElementById('studentHistoryPanel'); if(pan) pan.classList.add('hidden');
+            const img = document.getElementById('profileImg'); if(img) img.src = "https://via.placeholder.com/150?text=U";
+            const sDate = document.getElementById('stuDate'); if(sDate) { sDate.value = new Date().toISOString().split('T')[0]; window.handleJoiningDateChange(sDate.value); }
+        };
+
+        // --- 5. INITIALIZATION ---
+        const startSync = () => {
+            if (!appState.user) return;
+            const pinDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
+            onSnapshot(pinDocRef, (snap) => { if(snap.exists()) appState.adminPin = snap.data().pin; else setDoc(pinDocRef, { pin: '4568' }); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snap) => { appState.students = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), (snap) => { appState.transactions = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'expenses'), (snap) => { appState.expenses = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
+        };
+
+        async function initApp() {
+            await signInAnonymously(auth);
+            onAuthStateChanged(auth, (user) => { if (user) { appState.user = user; document.getElementById('loadingOverlay').style.opacity = '0'; setTimeout(() => document.getElementById('loadingOverlay').style.display = 'none', 500); startSync(); } });
+            
+            const today = new Date().toISOString().split('T')[0];
+            safeSetText('currentDate', new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
+            
+            const sc = document.getElementById('stuCourse'); if(sc) sc.innerHTML = COURSE_LIST.map(c => `<option value="${c}">${c}</option>`).join('');
+            const cf = document.getElementById('courseFilter'); if(cf) cf.innerHTML = '<option value="all">All Tracks</option>' + COURSE_LIST.map(c => `<option value="${c}">${c}</option>`).join('');
+            const yr = document.getElementById('reportYear'); if(yr) yr.innerHTML = [2025, 2026, 2027].map(y => `<option value="${y}" ${y == new Date().getFullYear()?'selected':''}>${y}</option>`).join('');
+            
+            document.querySelectorAll('input[type="date"]').forEach(el => { el.value = today; });
+        }
+
+        // --- 6. FORM SUBMISSIONS ---
+        document.getElementById('enrollmentForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editStudentId').value;
+            const data = { name: document.getElementById('stuName').value, course: document.getElementById('stuCourse').value, admFee: 500, mlyFee: Number(document.getElementById('stuMlyFee').value), phone: document.getElementById('stuPhone').value, date: document.getElementById('stuDate').value, nextDueDate: document.getElementById('stuDueDate').value, imgUrl: document.getElementById('stuImgUrl').value };
+            try {
+                if (id) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id), data);
+                else {
+                    const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), { ...data, status: 'Active', totalPaid: 0, createdAt: new Date().toISOString() });
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: docRef.id, studentName: data.name, amount: 500, type: 'Admission', paidDate: data.date, cycleDueDate: 'Initial' });
+                    window.recalculateBalances();
+                }
+                window.closeModal('studentModal'); showNotif("SUCCESS");
+            } catch (err) { showNotif("ERROR"); }
+        });
+
+        document.getElementById('feeForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('editTransId').value;
+            const amount = Number(document.getElementById('feeAmount').value);
+            const type = document.getElementById('feeType').value;
+            const paidDate = document.getElementById('feeDate').value;
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'transactions', editId), { amount, type, paidDate });
+                    window.recalculateBalances();
+                } else {
+                    const sId = document.getElementById('feeStudentSelect').value;
+                    let studentName = "Capital Injection";
+                    if(sId !== 'OWNER-CAP') {
+                        const student = appState.students.find(s => s.id == sId);
+                        studentName = student.name;
+                        const nextDueObj = new Date(student.nextDueDate); nextDueObj.setDate(nextDueObj.getDate() + 30);
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: sId, studentName: studentName, amount, type, paidDate, cycleDueDate: student.nextDueDate });
+                        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', sId), { nextDueDate: nextDueObj.toISOString().split('T')[0], totalPaid: (student.totalPaid || 0) + amount });
+                    } else {
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: null, studentName: "Capital (In)", amount, type: 'Capital', paidDate, cycleDueDate: 'Business' });
+                    }
+                }
+                window.resetFeeForm(); showNotif("LOGGED");
+            } catch (err) { showNotif("ERROR"); }
+        });
+
+        document.getElementById('expenseForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('editExpId').value;
+            const data = { name: document.getElementById('expName').value, amount: Number(document.getElementById('expAmount').value), category: document.getElementById('expCategory').value, date: document.getElementById('expDate').value };
+            try {
+                if(editId) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'expenses', editId), data);
+                else await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'expenses'), data);
+                window.resetExpForm(); showNotif("LOGGED");
+            } catch (err) { showNotif("ERROR"); }
+        });
+
+        initApp().catch(console.error);
     </script>
 </body>
 </html>
