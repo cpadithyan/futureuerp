@@ -3,490 +3,860 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Future U - Institute Management (Cloud Edition)</title>
+    <title>Future U - 2-Year Growth ERP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
         .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .sidebar-item.active { background-color: #3b82f6; color: white; }
+        .sidebar-item.active { background-color: #3b82f6; color: white; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .status-badge-active { background-color: #dcfce7; color: #166534; }
         .status-badge-stopped { background-color: #fee2e2; color: #991b1b; }
         .status-badge-overdue { background-color: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
         #loadingOverlay { transition: opacity 0.5s ease-out; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="min-h-screen">
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-white z-[300] flex flex-col items-center justify-center">
+    <div id="loadingOverlay" class="fixed inset-0 bg-white z-[300] flex flex-col items-center justify-center text-center">
         <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-gray-500 font-medium">Connecting to Future U Cloud...</p>
+        <p class="text-gray-500 font-medium text-sm tracking-wider uppercase">Powering Future U<br><span class="text-[10px]">Cloud Ecosystem</span></p>
+    </div>
+
+    <!-- PIN Lock Overlay -->
+    <div id="pinOverlay" class="fixed inset-0 bg-slate-900/95 z-[250] hidden flex-col items-center justify-center p-6 backdrop-blur-md">
+        <div class="w-full max-w-xs text-center">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl mb-6 mx-auto shadow-xl text-center">
+                <i class="fas fa-shield-halved text-center"></i>
+            </div>
+            <h3 class="text-white text-xl font-bold mb-2 text-center">Secure Owner Area</h3>
+            <p class="text-slate-400 text-sm mb-8 text-center">Enter PIN to access Financials & Analytics.</p>
+            <div class="flex justify-center gap-3 mb-8 text-center">
+                <div id="pin-1" class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all text-center"></div>
+                <div id="pin-2" class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all text-center"></div>
+                <div id="pin-3" class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all text-center"></div>
+                <div id="pin-4" class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all text-center"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <button onclick="pressPin('1')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all text-center">1</button>
+                <button onclick="pressPin('2')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all text-center">2</button>
+                <button onclick="pressPin('3')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all text-center">3</button>
+                <button onclick="pressPin('4')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all text-center">4</button>
+                <button onclick="pressPin('5')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all text-center">5</button>
+                <button onclick="pressPin('6')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all text-center">6</button>
+                <button onclick="pressPin('7')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all text-center">7</button>
+                <button onclick="pressPin('8')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all text-center">8</button>
+                <button onclick="pressPin('9')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all text-center">9</button>
+                <button onclick="clearPin()" class="h-14 bg-red-900/30 text-red-500 rounded-xl text-xs font-bold text-center">CLR</button>
+                <button onclick="pressPin('0')" class="h-14 bg-slate-800 text-white rounded-xl text-xl font-bold hover:bg-slate-700 active:scale-95 transition-all text-center">0</button>
+                <button onclick="cancelPin()" class="h-14 bg-slate-800 text-slate-400 rounded-xl text-xs font-bold text-center">ESC</button>
+            </div>
+        </div>
     </div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50">
-        <div class="p-6">
-            <h1 class="text-2xl font-bold text-blue-600 flex items-center gap-2">
-                <i class="fas fa-graduation-cap"></i> Future U
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-2xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 overflow-y-auto">
+        <div class="p-6 border-b border-gray-50 text-center sm:text-left">
+            <h1 class="text-2xl font-black text-blue-600 flex items-center gap-2 justify-center sm:justify-start">
+                <i class="fas fa-graduation-cap"></i> FUTURE U
             </h1>
-            <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-bold">Cloud ERP Manager</p>
+            <p class="text-[9px] text-gray-400 mt-1 uppercase tracking-[0.2em] font-extrabold text-center sm:text-left">Vision 2027 Dashboard</p>
         </div>
-        <nav class="mt-6 px-4 space-y-2">
+        <nav class="mt-4 px-4 space-y-1">
             <button onclick="showTab('dashboard')" class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
-                <i class="fas fa-chart-line"></i> Dashboard
+                <i class="fas fa-chart-pie w-5"></i> <span class="font-semibold text-sm">Dashboard</span>
             </button>
             <button onclick="showTab('students')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
-                <i class="fas fa-users"></i> Student Database
+                <i class="fas fa-user-graduate w-5"></i> <span class="font-semibold text-sm">Students</span>
             </button>
             <button onclick="showTab('fees')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
-                <i class="fas fa-hand-holding-dollar"></i> Fee Ledger
+                <i class="fas fa-hand-holding-dollar w-5"></i> <span class="font-semibold text-sm">Ledger</span>
+            </button>
+            <div class="pt-4 pb-2"><p class="text-[10px] text-gray-400 font-black uppercase tracking-widest px-4">Insights</p></div>
+            <button onclick="showTab('reports')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
+                <i class="fas fa-file-invoice-dollar w-5"></i> <span class="font-semibold text-sm">Detailed Reports</span> <i class="fas fa-lock ml-auto text-[10px] opacity-20"></i>
+            </button>
+            <button onclick="showTab('growth')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
+                <i class="fas fa-arrow-trend-up w-5"></i> <span class="font-semibold text-sm">Growth Board</span> <i class="fas fa-lock ml-auto text-[10px] opacity-20"></i>
             </button>
             <button onclick="showTab('financials')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-blue-50">
-                <i class="fas fa-building-columns"></i> Financial Plan
+                <i class="fas fa-vault w-5"></i> <span class="font-semibold text-sm">Financial Vault</span> <i class="fas fa-lock ml-auto text-[10px] opacity-20"></i>
             </button>
         </nav>
-        <div class="absolute bottom-6 left-6 right-6">
-            <div class="bg-blue-50 rounded-xl p-4">
-                <p class="text-sm font-semibold text-blue-800">Growth Scoreboard</p>
-                <div class="w-full bg-blue-200 rounded-full h-2 mt-2">
-                    <div id="targetProgress" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+        <div class="absolute bottom-6 left-6 right-6 text-center">
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-4 text-white shadow-lg text-center">
+                <p class="text-[10px] font-bold uppercase opacity-80 tracking-widest text-center">Vision 2027</p>
+                <p id="visionProgressText" class="text-xl font-black mt-1 text-center">0 / 500</p>
+                <div class="w-full bg-white/20 rounded-full h-1.5 mt-3">
+                    <div id="visionBar" class="bg-white h-1.5 rounded-full" style="width: 0%"></div>
                 </div>
-                <p id="targetText" class="text-xs mt-2 text-blue-600 font-medium">Syncing...</p>
             </div>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="md:ml-64 p-4 md:p-8">
-        <header class="flex justify-between items-center mb-8">
-            <button class="md:hidden text-2xl" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-            <h2 id="pageTitle" class="text-2xl font-bold text-gray-800">Dashboard</h2>
+    <main class="lg:ml-64 p-4 lg:p-10 text-center lg:text-left">
+        <header class="flex justify-between items-center mb-10 text-center lg:text-left">
+            <button class="lg:hidden text-2xl p-2 bg-white rounded-xl shadow-sm text-center" onclick="toggleSidebar()"><i class="fas fa-bars text-center"></i></button>
+            <div>
+                <h2 id="pageTitle" class="text-3xl font-black tracking-tight text-slate-800">Dashboard</h2>
+                <p id="currentDate" class="text-sm font-semibold text-gray-400 mt-1"></p>
+            </div>
             <div class="flex items-center gap-4">
-                <div class="text-right hidden sm:block">
-                    <p id="currentDate" class="text-sm text-gray-500 font-medium"></p>
-                    <p id="cloudStatus" class="text-[10px] text-green-500 font-bold uppercase tracking-widest">● Cloud Connected</p>
+                <div class="hidden sm:flex flex-col items-end">
+                    <span id="cloudStatus" class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold uppercase tracking-widest flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Cloud Active
+                    </span>
                 </div>
-                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">FU</div>
+                <div class="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center border border-gray-100 font-black text-blue-600">FU</div>
             </div>
         </header>
 
-        <!-- DASHBOARD TAB -->
-        <div id="dashboard" class="tab-content active space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="glass-card p-6 rounded-2xl shadow-sm">
-                    <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Active Students</h3>
-                    <p id="statActive" class="text-3xl font-bold">0</p>
-                    <span class="text-xs text-blue-500 font-semibold uppercase tracking-wider">Goal: 100</span>
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="tab-content active space-y-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 text-center">
+                <div class="glass-card p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border-b-4 border-blue-500 text-center">
+                    <h3 class="text-gray-400 font-bold text-xs uppercase tracking-widest text-center">Active Enrollment</h3>
+                    <p id="statActive" class="text-4xl font-black mt-2 text-center">0</p>
+                    <span id="targetSubtext" class="text-xs text-blue-500 font-bold mt-2 inline-block text-center">Goal: 500 Students</span>
                 </div>
-                <div class="glass-card p-6 rounded-2xl shadow-sm border-l-4 border-red-500">
-                    <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Overdue Fees</h3>
-                    <p id="statOverdue" class="text-3xl font-bold text-red-600">0</p>
-                    <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Follow-up Priority</span>
+                <div class="glass-card p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border-b-4 border-red-500 text-center">
+                    <h3 class="text-gray-400 font-bold text-xs uppercase tracking-widest text-center">Dues Pending</h3>
+                    <p id="statOverdue" class="text-4xl font-black mt-2 text-red-600 text-center">0</p>
+                    <span class="text-xs text-red-400 font-bold mt-2 inline-block text-center w-full">5 Follow-ups mandatory target</span>
                 </div>
-                <div class="glass-card p-6 rounded-2xl shadow-sm">
-                    <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Total Collected</h3>
-                    <p id="statRevenue" class="text-3xl font-bold">₹0</p>
-                    <span class="text-xs text-green-500 font-semibold uppercase tracking-wider">Revenue Ledger</span>
+                <div class="glass-card p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border-b-4 border-green-500 text-center">
+                    <h3 class="text-gray-400 font-bold text-xs uppercase tracking-widest text-center">Monthly Net Profit</h3>
+                    <p id="statProfit" class="text-4xl font-black mt-2 text-green-600 text-center">₹0</p>
+                    <div class="flex justify-between text-[10px] font-bold mt-3 bg-gray-50 p-2 rounded-lg text-center">
+                        <span class="text-blue-500" id="statMonthlyRev">Rev: ₹0</span>
+                        <span class="text-red-500 mx-2">|</span>
+                        <span class="text-red-500" id="statMonthlyExp">Exp: ₹0</span>
+                    </div>
                 </div>
-                <div class="glass-card p-6 rounded-2xl shadow-sm">
-                    <h3 class="text-gray-500 font-medium mb-1 text-sm uppercase">Debt Repayment</h3>
-                    <p id="statDebt" class="text-3xl font-bold text-red-400">₹0</p>
-                    <span class="text-xs text-indigo-400 font-semibold uppercase tracking-wider">20% Logic</span>
+                <div class="glass-card p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border-b-4 border-indigo-500 text-center">
+                    <h3 class="text-gray-400 font-bold text-xs uppercase tracking-widest text-center">Total Collected</h3>
+                    <p id="statRevenue" class="text-4xl font-black mt-2 text-center">₹0</p>
+                    <span class="text-xs text-indigo-400 font-bold mt-2 inline-block text-center w-full text-center">Vision 2027 Valuation</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h4 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-phone-alt text-blue-500"></i> Rural Follow-up List</h4>
-                    <div id="followUpList" class="space-y-3">
-                        <p class="text-sm text-gray-400 italic">Syncing active dues...</p>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 text-center">
+                <div class="xl:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center">
+                    <div class="flex justify-between items-center mb-6 text-center">
+                        <h4 class="font-black text-lg flex items-center gap-3 text-center sm:text-left"><i class="fas fa-bullhorn text-blue-500 text-center"></i> Marketing Phase Logic</h4>
+                        <span class="text-[10px] font-black bg-blue-100 text-blue-600 px-3 py-1 rounded-full uppercase text-center" id="currentPhaseBadge">Phase 1</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
+                        <div class="space-y-4 text-center md:text-left">
+                            <p id="currentPhaseTitle" class="text-xl font-extrabold text-slate-800 text-center sm:text-left"></p>
+                            <p id="currentPhaseDesc" class="text-sm text-gray-500 leading-relaxed text-center sm:text-left"></p>
+                            <button onclick="showTab('growth')" class="text-blue-600 text-xs font-black uppercase tracking-widest flex items-center justify-center md:justify-start gap-2 hover:gap-3 transition-all text-center">View Roadmap <i class="fas fa-arrow-right text-center"></i></button>
+                        </div>
+                        <div id="phaseChecklist" class="space-y-3 bg-gray-50 p-6 rounded-2xl text-center sm:text-left text-center">
+                            <!-- JS Driven -->
+                        </div>
                     </div>
                 </div>
-                <div class="bg-slate-900 p-8 rounded-2xl text-white shadow-xl relative overflow-hidden">
-                    <div class="relative z-10">
-                        <h3 class="text-xl font-bold mb-4">Strategic Allocation</h3>
-                        <div id="miniAlloc" class="space-y-3"></div>
+                <div class="bg-slate-900 p-8 rounded-[2rem] text-white shadow-2xl relative overflow-hidden flex flex-col justify-between text-center">
+                    <div class="relative z-10 text-center">
+                        <h3 class="text-xl font-black mb-6 text-center">Money Allocation (20%)</h3>
+                        <div id="miniAlloc" class="space-y-4 text-center"></div>
                     </div>
-                    <div class="absolute -right-10 -bottom-10 opacity-10 text-8xl"><i class="fas fa-chart-pie"></i></div>
+                    <p class="text-[10px] opacity-40 font-bold mt-6 uppercase tracking-widest text-center">Automated Strategy Engine</p>
+                    <div class="absolute -right-16 -bottom-16 opacity-10 text-[12rem] rotate-12 text-center"><i class="fas fa-piggy-bank text-center"></i></div>
                 </div>
             </div>
         </div>
 
         <!-- STUDENTS TAB -->
         <div id="students" class="tab-content space-y-6">
-            <div class="flex justify-between items-center">
-                <h3 class="text-xl font-bold">Student Database</h3>
-                <button onclick="openModal('studentModal')" class="bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 font-semibold shadow-lg transition-all">
-                    <i class="fas fa-user-plus mr-2"></i>New Admission
-                </button>
+            <div class="flex justify-between items-center flex-wrap gap-4 text-center">
+                <h3 class="text-xl font-black text-center sm:text-left">Student Database</h3>
+                <div class="flex gap-2 justify-center">
+                    <button onclick="copyNumbers()" class="bg-slate-100 text-slate-700 px-5 py-3 rounded-xl hover:bg-slate-200 font-bold text-xs flex items-center gap-2 text-center">
+                        <i class="fas fa-copy text-center"></i> Copy Numbers
+                    </button>
+                    <button onclick="openModal('studentModal')" class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 font-black shadow-xl transition-all flex items-center gap-2 text-center">
+                        <i class="fas fa-plus text-center"></i> New Admission
+                    </button>
+                </div>
             </div>
-            <div class="glass-card rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50 border-b">
-                            <tr>
-                                <th class="p-4 font-semibold text-gray-600">Student</th>
-                                <th class="p-4 font-semibold text-gray-600">Course</th>
-                                <th class="p-4 font-semibold text-gray-600">Monthly Fee</th>
-                                <th class="p-4 font-semibold text-gray-600">Next Due Date</th>
-                                <th class="p-4 font-semibold text-gray-600">Status</th>
-                                <th class="p-4 font-semibold text-gray-600">Actions</th>
+            <div class="glass-card rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 text-center">
+                <div class="overflow-x-auto text-center">
+                    <table class="w-full text-left text-center">
+                        <thead class="bg-gray-50 border-b text-center">
+                            <tr class="text-center">
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-left">Student</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-left">Course</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-center">Monthly Fee</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-center">Due Date</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-center">Status</th>
+                                <th class="p-6 font-bold text-gray-400 uppercase text-[10px] tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="studentTableBody"></tbody>
+                        <tbody id="studentTableBody" class="text-center"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- FEES TAB -->
+        <!-- FEES & EXPENSES TAB -->
         <div id="fees" class="tab-content space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-1">
-                    <div class="glass-card p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-4">
-                        <h4 class="font-bold mb-4 text-blue-600 flex items-center gap-2"><i class="fas fa-coins"></i> Collect Fee</h4>
-                        <form id="feeForm" class="space-y-4">
-                            <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase">Student</label>
-                                <select id="feeStudentSelect" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none" required></select>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 text-center">
+                <div class="lg:col-span-1 space-y-8 text-center">
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center">
+                        <h4 class="font-black text-lg mb-6 text-blue-600 flex items-center justify-center sm:justify-start gap-2 text-center" id="feeFormTitle"><i class="fas fa-wallet text-center"></i> Collect Fee</h4>
+                        <form id="feeForm" class="space-y-5 text-center">
+                            <input type="hidden" id="editTransId">
+                            <div id="studentSelectContainer" class="text-center">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Student</label>
+                                <select id="feeStudentSelect" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm text-center" required></select>
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase">Amount (₹)</label>
-                                    <input type="number" id="feeAmount" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none" required>
+                            <div id="studentNameDisplay" class="hidden text-center">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Selected Student</label>
+                                <p id="editStudentName" class="p-4 bg-blue-50 text-blue-800 rounded-2xl font-black text-sm mt-1 text-center"></p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div class="text-center">
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Amount (₹)</label>
+                                    <input type="number" id="feeAmount" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm text-center" required>
                                 </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase">Type</label>
-                                    <select id="feeType" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none">
+                                <div class="text-center">
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Type</label>
+                                    <select id="feeType" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm text-center">
                                         <option value="Monthly">Monthly Fee</option>
                                         <option value="Admission">Admission Fee</option>
                                         <option value="Advance">Bulk Advance</option>
                                     </select>
                                 </div>
                             </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase">Paid Date</label>
-                                <input type="date" id="feeDate" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none" required>
+                            <div class="text-center">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center text-center">Actual Payment Date</label>
+                                <input type="date" id="feeDate" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm text-center" required>
+                                <p class="text-[9px] text-blue-400 mt-2 font-black uppercase text-center text-center">* System automatically advances cycle from last due date.</p>
                             </div>
-                            <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg transition-all">Submit to Cloud</button>
+                            <div class="flex gap-2 text-center">
+                                <button type="submit" id="feeSubmitBtn" class="flex-1 bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 shadow-xl transition-all text-center text-center">Submit Receipt</button>
+                                <button type="button" id="cancelFeeEditBtn" onclick="resetFeeForm()" class="hidden px-6 bg-slate-200 text-slate-700 rounded-2xl font-black hover:bg-slate-300 text-center">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-red-100 text-center">
+                        <h4 class="font-black text-lg mb-6 text-red-600 flex items-center justify-center sm:justify-start gap-2 text-center"><i class="fas fa-basket-shopping text-center"></i> Expense Log</h4>
+                        <form id="expenseForm" class="space-y-5 text-center">
+                            <div class="text-center">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Purpose</label>
+                                <input type="text" id="expName" placeholder="e.g. Rent, Marketing" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm text-center" required>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div class="text-center">
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Cost (₹)</label>
+                                    <input type="number" id="expAmount" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm text-center" required>
+                                </div>
+                                <div class="text-center">
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Date</label>
+                                    <input type="date" id="expDate" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-sm text-center" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-red-500 text-white py-5 rounded-2xl font-black hover:bg-red-600 shadow-xl transition-all text-center">Record Payment</button>
                         </form>
                     </div>
                 </div>
                 <div class="lg:col-span-2">
-                    <div class="glass-card p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="font-bold mb-4">Payment History (Last 50)</h4>
-                        <div id="transactionList" class="space-y-3"></div>
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center">
+                        <div class="flex justify-between items-center mb-6 text-center sm:text-left">
+                            <h4 class="font-black text-lg text-center">Transaction History</h4>
+                            <div class="flex gap-2 text-[9px] uppercase font-extrabold tracking-widest text-center">
+                                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-center">Fees</span>
+                                <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-center">Expenses</span>
+                            </div>
+                        </div>
+                        <div id="transactionList" class="space-y-4 max-h-[700px] overflow-y-auto pr-3 text-center"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- FINANCIALS TAB -->
+        <!-- REPORTS TAB -->
+        <div id="reports" class="tab-content space-y-8">
+            <div class="flex justify-between items-center flex-wrap gap-4 text-center lg:text-left">
+                <h3 class="text-xl font-black text-center lg:text-left">Analytical Reports</h3>
+                <div class="flex gap-2 bg-white p-1 rounded-xl shadow-sm border text-center">
+                    <select id="reportYear" class="p-2 text-sm border-none outline-none font-black text-center" onchange="window.updateUI()"></select>
+                    <select id="reportMonth" class="p-2 text-sm border-none outline-none font-black text-center" onchange="window.updateUI()">
+                        <option value="all">Full Year View</option>
+                        <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+                        <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+                        <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+                        <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 text-center">
+                <div class="lg:col-span-1 space-y-8 text-center sm:text-left">
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border-l-8 border-blue-600 text-center">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Period Revenue</p>
+                        <p id="repTotalRev" class="text-4xl font-black mt-2 text-center">₹0</p>
+                        <div class="mt-6 pt-6 border-t border-gray-50 space-y-3 text-center">
+                            <div class="flex justify-between text-xs font-bold text-center"><span class="text-gray-500 text-left">Admissions:</span><span id="repAdmFee">₹0</span></div>
+                            <div class="flex justify-between text-xs font-bold text-center"><span class="text-gray-500 text-left">Regular Fees:</span><span id="repMlyFee">₹0</span></div>
+                            <div class="flex justify-between text-xs font-bold text-center"><span class="text-gray-500 text-left text-center">Bulk Advance:</span><span id="repAdvFee">₹0</span></div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border-l-8 border-red-600 text-center">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Operational Costs</p>
+                        <p id="repTotalExp" class="text-4xl font-black mt-2 text-red-600 text-center">₹0</p>
+                        <p class="text-[10px] text-gray-400 mt-4 leading-relaxed font-semibold text-center">Total reinvestment & essentials for selected range.</p>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 space-y-8 text-center sm:text-left">
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm h-full text-center sm:text-left">
+                        <h4 class="font-black text-lg mb-8 flex items-center justify-center sm:justify-start gap-3 text-center sm:text-left"><i class="fas fa-medal text-yellow-500 text-center"></i> Performance by Course</h4>
+                        <div id="courseRevenueList" class="space-y-6 text-center sm:text-left"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center">
+                <h4 class="font-black text-lg mb-6 text-center"><i class="fas fa-users-viewfinder text-indigo-500 text-center"></i> Referral Sources</h4>
+                <div id="referralList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center"></div>
+            </div>
+        </div>
+
+        <!-- GROWTH BOARD -->
+        <div id="growth" class="tab-content space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 text-center">
+                <div class="lg:col-span-2 space-y-8 text-center">
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center">
+                        <h4 class="font-black text-lg mb-8 flex items-center justify-center lg:justify-start gap-3 text-center sm:text-left text-center"><i class="fas fa-calendar-check text-blue-600 text-center"></i> Strategy Checklist</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                            <div class="space-y-4 text-center">
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Daily Non-Negotiables</p>
+                                <label class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100 text-center">
+                                    <input type="checkbox" class="w-6 h-6 rounded-lg text-blue-600 focus:ring-0 border-gray-200 text-center" onchange="window.toggleTask('followup')">
+                                    <span class="text-sm font-extrabold text-center">5 Follow-up calls/day</span>
+                                </label>
+                                <label class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100 text-center text-center">
+                                    <input type="checkbox" class="w-6 h-6 rounded-lg text-blue-600 focus:ring-0 border-gray-200 text-center text-center" onchange="window.toggleTask('whatsapp')">
+                                    <span class="text-sm font-extrabold text-center">WhatsApp Broadcast sent</span>
+                                </label>
+                            </div>
+                            <div class="space-y-4 text-center">
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Weekly Growth Actions</p>
+                                <label class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100 text-center">
+                                    <input type="checkbox" class="w-6 h-6 rounded-lg text-blue-600 focus:ring-0 border-gray-200 text-center" onchange="window.toggleTask('social')">
+                                    <span class="text-sm font-extrabold text-center">3 Social Posts/week</span>
+                                </label>
+                                <label class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100 text-center">
+                                    <input type="checkbox" class="w-6 h-6 rounded-lg text-blue-600 focus:ring-0 border-gray-200 text-center" onchange="window.toggleTask('improve')">
+                                    <span class="text-sm font-extrabold text-center">1 Business Improvement</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center sm:text-left">
+                        <h4 class="font-black text-lg mb-8 text-center sm:text-left">Vision 2026-2027 Targets</h4>
+                        <div class="overflow-x-auto text-center sm:text-left">
+                            <table class="w-full text-left text-sm text-center sm:text-left">
+                                <thead class="text-center sm:text-left">
+                                    <tr class="text-gray-400 uppercase text-[10px] tracking-widest font-black border-b text-center sm:text-left">
+                                        <th class="pb-6 text-left">Milestone</th>
+                                        <th class="pb-6 text-left text-center">Target</th>
+                                        <th class="pb-6 text-center text-center text-center">Current</th>
+                                        <th class="pb-6 text-center text-center text-center">Period Revenue</th>
+                                        <th class="pb-6 text-right text-right">Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="performanceBody" class="text-center sm:text-left text-center sm:text-left"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-8 text-center sm:text-left">
+                    <div class="bg-blue-600 text-white p-8 rounded-[2.5rem] shadow-2xl text-center">
+                        <p class="text-[10px] font-black uppercase tracking-widest opacity-60 text-center" id="phaseIndicator">Phase 1</p>
+                        <h3 id="growthPhaseTitle" class="text-2xl font-black mt-2 text-center"></h3>
+                        <p id="growthPhaseDesc" class="text-sm opacity-80 mt-4 leading-relaxed font-medium text-center"></p>
+                        <div class="mt-8 space-y-4 text-center" id="growthChecklist"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- financial tab -->
         <div id="financials" class="tab-content space-y-6">
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="glass-card p-8 rounded-3xl shadow-sm" id="allocationStats"></div>
-                <div class="bg-slate-900 text-white p-8 rounded-3xl shadow-xl flex flex-col justify-center">
-                    <h4 class="font-bold text-lg mb-4 text-blue-400 flex items-center gap-2">
-                        <i class="fas fa-shield-halved"></i> Cloud Data Protection
-                    </h4>
-                    <p class="text-sm opacity-80 leading-relaxed">
-                        All financial records and student data are stored in a secured Firebase Firestore instance. 
-                        Your data is encrypted in transit and at rest.
-                    </p>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-center">
+                <div class="glass-card p-10 rounded-[2.5rem] shadow-sm text-center" id="allocationStats"></div>
+                <div class="flex flex-col gap-8 text-center">
+                    <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-blue-100 text-center lg:text-left">
+                        <h4 class="font-black text-xl mb-6 text-blue-600 flex items-center justify-center lg:justify-start gap-3 text-center">
+                            <i class="fas fa-key text-center text-center text-center"></i> Security Settings
+                        </h4>
+                        <div class="space-y-5 text-center sm:text-left">
+                            <div class="text-center sm:text-left">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center sm:text-left">Change Owner PIN</label>
+                                <input type="password" id="newPin" maxlength="4" placeholder="4-digit PIN" class="w-full p-5 bg-gray-50 border-none rounded-2xl mt-2 outline-none font-bold text-xl tracking-[1em] text-center">
+                            </div>
+                            <button onclick="window.updatePin()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 shadow-xl transition-all text-center">Save New Security PIN</button>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-2xl text-center sm:text-left">
+                        <h4 class="font-black text-xl mb-6 text-blue-400 text-center text-center">Strategic Debt Rules</h4>
+                        <div class="space-y-5 text-sm font-semibold opacity-90 leading-relaxed text-center sm:text-left">
+                            <p class="flex items-start gap-4 opacity-90 text-center sm:text-left text-center"><i class="fas fa-bolt text-yellow-400 mt-1 text-center"></i> Profits < Target = 0% Personal bucket.</p>
+                            <p class="flex items-start gap-4 opacity-90 text-center sm:text-left"><i class="fas fa-bolt text-yellow-400 mt-1 text-center text-center"></i> Jan-Mar focus is maximum debt repayment.</p>
+                            <p class="flex items-start gap-4 opacity-90 text-center sm:text-left"><i class="fas fa-bolt text-yellow-400 mt-1 text-center text-center text-center"></i> Reward fund starts crossing 100 students.</p>
+                        </div>
+                        <button onclick="window.exportBackup()" class="w-full bg-white/10 hover:bg-white/20 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 mt-10 transition-all text-center">
+                            <i class="fas fa-cloud-arrow-down text-center text-center"></i> Local Data Backup
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Admission Modal -->
-    <div id="studentModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[100] p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-2xl rounded-3xl p-8 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-800">New Enrollment</h3>
-                <button onclick="closeModal('studentModal')" class="text-gray-400 hover:text-black text-3xl">&times;</button>
+    <!-- Student Modal (Add/Edit Profile) -->
+    <div id="studentModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[100] p-4 backdrop-blur-xl">
+        <div class="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] text-center sm:text-left">
+            <div class="p-8 lg:p-10 overflow-y-auto w-full text-center sm:text-left text-center">
+                <button onclick="window.closeModal('studentModal')" class="absolute top-8 right-8 text-gray-400 hover:text-black text-3xl font-black transition-all text-center text-center text-center">&times;</button>
+                <h3 class="text-3xl font-black text-slate-800 mb-8 text-center sm:text-left text-center" id="studentModalTitle">Admission Registry</h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 text-center sm:text-left">
+                    <!-- Form Section -->
+                    <form id="enrollmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center sm:text-left">
+                        <input type="hidden" id="editStudentId">
+                        <div class="md:col-span-2 text-center sm:text-left">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center sm:text-left text-center">Student Name</label>
+                            <input type="text" id="stuName" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-center sm:text-left" placeholder="Full name" required>
+                        </div>
+                        <div class="md:col-span-2 text-center sm:text-left text-center">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center sm:text-left text-center">Select Course</label>
+                            <select id="stuCourse" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-center sm:text-left" required></select>
+                        </div>
+                        <div class="text-center sm:text-left text-center">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Admission Fee (₹)</label>
+                            <input type="number" id="stuAdmFee" value="500" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-center" required>
+                        </div>
+                        <div class="text-center sm:text-left text-center text-center">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center text-center">Monthly Fee (₹)</label>
+                            <input type="number" id="stuMlyFee" value="1000" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-center" required>
+                        </div>
+                        <div class="text-center sm:text-left text-center text-center">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center text-center">Contact Phone</label>
+                            <input type="text" id="stuPhone" placeholder="Mobile number" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-center" required>
+                        </div>
+                        <div class="text-center sm:text-left text-center text-center text-center">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center text-center">Joining Date</label>
+                            <input type="date" id="stuDate" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-center" required onchange="window.handleJoiningDateChange(this.value)">
+                        </div>
+                        <div class="text-center sm:text-left text-center text-center text-center text-center">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center text-center">Cycle Reset Date</label>
+                            <input type="date" id="stuDueDate" class="w-full p-4 bg-gray-50 border-none rounded-2xl mt-1 outline-none font-bold text-center" required>
+                        </div>
+                        <div class="md:col-span-2 pt-4 text-center text-center">
+                            <button type="submit" id="studentSubmitBtn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 shadow-2xl transition-all text-center text-center">Authorize Entry</button>
+                        </div>
+                    </form>
+
+                    <!-- History / Detail Section -->
+                    <div id="studentHistoryPanel" class="hidden space-y-6 text-center text-center">
+                        <div class="bg-gray-50 rounded-3xl p-6 text-center text-center text-center">
+                            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 text-center text-center text-center">Payment Ledger & Status</h4>
+                            <div id="stuProfileStats" class="grid grid-cols-2 gap-4 mb-6 text-center text-center">
+                                <!-- JS Driven -->
+                            </div>
+                            <div class="space-y-3 overflow-y-auto max-h-[300px] pr-2 text-center text-center text-center" id="stuPaymentHistoryList">
+                                <!-- JS Driven History -->
+                            </div>
+                            <div class="mt-6 pt-6 border-t border-gray-200 text-center text-center text-center">
+                                <button onclick="window.quickAddFeeFromProfile()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black hover:bg-green-700 transition-all flex items-center justify-center gap-3 text-center text-center">
+                                    <i class="fas fa-plus text-center text-center text-center"></i> Collect New Fee
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <form id="enrollmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="md:col-span-2">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Student Name</label>
-                    <input type="text" id="stuName" class="w-full p-4 border rounded-xl outline-none mt-1" required>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Select Course</label>
-                    <select id="stuCourse" class="w-full p-4 border rounded-xl outline-none mt-1" required></select>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Adm. Fee (₹)</label>
-                    <input type="number" id="stuAdmFee" value="500" class="w-full p-4 border rounded-xl mt-1 outline-none" required>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Monthly Fee (₹)</label>
-                    <input type="number" id="stuMlyFee" value="1000" class="w-full p-4 border rounded-xl mt-1 outline-none" required>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Joining Date</label>
-                    <input type="date" id="stuDate" class="w-full p-4 border rounded-xl mt-1 outline-none" required>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">First Due Date</label>
-                    <input type="date" id="stuDueDate" class="w-full p-4 border rounded-xl mt-1 outline-none" required>
-                </div>
-                <div class="md:col-span-2 pt-4">
-                    <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-xl transition-all">Enroll & Sync to Cloud</button>
-                </div>
-            </form>
         </div>
     </div>
 
-    <div id="notif" class="fixed bottom-6 right-6 hidden bg-gray-900 text-white px-8 py-4 rounded-2xl shadow-2xl z-[200]">Action Successful!</div>
-
-    <!-- Firebase SDK -->
+    <!-- SDK & Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, addDoc, getDoc, collection, onSnapshot, query, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyB2bcDcHkL7mtu8Hy_XsrrCnJ1TRfzJNyc",
-            authDomain: "futureuerp.firebaseapp.com",
-            projectId: "futureuerp",
-            storageBucket: "futureuerp.firebasestorage.app",
-            messagingSenderId: "199842262718",
-            appId: "1:199842262718:web:553ca10bb5da77656478ef",
-            measurementId: "G-WHXM1VDGZY"
-        };
-
-        const COURSE_LIST = ["DIFA– Diploma in Indian and Foreign Accounting", "PDIFA– Professional Diploma in Indian & Foreign Accounting", "DFA– Diploma in Financial Accounting", "PGDCA– Post Graduate Diploma in Computer Application", "DCA–Diploma in Computer Application", "DOM–Diploma in Office Management", "Graphic Designing + Digital Marketing", "NIOS", "Vacation Course", "JAVA Programming", "PYTHON Programming", "HTML", "Zoho Books", "Tally Prime", "Adobe Photoshop", "Adobe PageMaker", "Adobe InDesign", "Microsoft Excel", "Microsoft Office Suite", "PSC Coaching", "SSC Coaching", "RRB Coaching", "SSC + RRB Coaching", "Reading Room / Study Centre Access"];
-
-        // State & Services
+        // Firebase Setup
+        const firebaseConfig = { apiKey: "AIzaSyB2bcDcHkL7mtu8Hy_XsrrCnJ1TRfzJNyc", authDomain: "futureuerp.firebaseapp.com", projectId: "futureuerp", storageBucket: "futureuerp.firebasestorage.app", messagingSenderId: "199842262718", appId: "1:199842262718:web:553ca10bb5da77656478ef", measurementId: "G-WHXM1VDGZY" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'futureuerp';
-        
-        let appState = {
-            students: [],
-            transactions: [],
-            user: null
+
+        let appState = { students: [], transactions: [], expenses: [], user: null, adminPin: '4568', isAuthenticated: false, currentInputPin: '', targetTab: 'dashboard' };
+
+        const COURSE_LIST = ["DIFA– Diploma in Indian and Foreign Accounting", "PDIFA– Professional Diploma in Indian & Foreign Accounting", "DFA– Diploma in Financial Accounting", "PGDCA– Post Graduate Diploma in Computer Application", "DCA–Diploma in Computer Application", "DOM–Diploma in Office Management", "Graphic Designing + Digital Marketing", "NIOS", "Vacation Course", "JAVA Programming", "PYTHON Programming", "HTML", "Zoho Books", "Tally Prime", "Adobe Photoshop", "Adobe PageMaker", "Adobe InDesign", "Microsoft Excel", "Microsoft Office Suite", "PSC Coaching", "SSC Coaching", "RRB Coaching", "SSC + RRB Coaching", "Reading Room / Study Centre Access"];
+        const MONTH_MAP = { "Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "May": 4, "Jun": 5, "Jul": 6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11 };
+        const TARGETS = [{m:"Jan",y:2026,t:25},{m:"Feb",y:2026,t:40},{m:"Mar",y:2026,t:60},{m:"Apr",y:2026,t:80},{m:"May",y:2026,t:100},{m:"Jun",y:2026,t:125},{m:"Aug",y:2026,t:175},{m:"Oct",y:2026,t:225},{m:"Dec",y:2026,t:250},{m:"Mar",y:2027,t:300},{m:"Jun",y:2027,t:375},{m:"Sep",y:2027,t:450},{m:"Dec",y:2027,t:500}];
+        const PHASES = [{id:1,range:[0,1],title:"Foundation",desc:"Build testimonials.",checklist:["Broadcast","5 Reviews","Free Demos"]},{id:2,range:[2,3],title:"Scale",desc:"Social media.",checklist:["Shorts","Referrals","School Outreach"]},{id:3,range:[4,5],title:"Authority",desc:"Ads.",checklist:["Ads","Webinars","PR"]},{id:4,range:[6,11],title:"Brand",desc:"Online Footprint.",checklist:["Portal","Collaborations"]},{id:5,range:[12,23],title:"Growth",desc:"National expansion.",checklist:["Regional Centers","Staff Expansion"]}];
+
+        // UI HELPERS
+        const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
+        const safeSetHTML = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+        const showNotif = (msg) => { const n = document.getElementById('notif'); if (n) { n.innerText = msg; n.classList.remove('hidden'); setTimeout(() => n.classList.add('hidden'), 3000); } };
+
+        const isPeriodMatch = (dateStr, month, year) => {
+            if (!dateStr) return false;
+            const [y, m, d] = dateStr.split('-').map(Number);
+            if (month === 'all') return y === Number(year);
+            return y === Number(year) && (m - 1) === Number(month);
         };
 
-        // UI Helpers
-        const showNotif = (msg) => {
-            const n = document.getElementById('notif');
-            n.innerText = msg;
-            n.classList.remove('hidden');
-            setTimeout(() => n.classList.add('hidden'), 3000);
+        const updateUI = () => {
+            const today = new Date();
+            const currMoIdx = today.getMonth();
+            const currYr = today.getFullYear();
+            const activeStudents = appState.students.filter(s => s.status === 'Active');
+            const overdue = activeStudents.filter(s => new Date(s.nextDueDate) < today);
+
+            const totalRev = appState.transactions.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            const repMo = document.getElementById('reportMonth')?.value || currMoIdx;
+            const repYr = document.getElementById('reportYear')?.value || currYr;
+            const filteredTrans = appState.transactions.filter(t => isPeriodMatch(t.paidDate, repMo, repYr));
+            const filteredExp = appState.expenses.filter(e => isPeriodMatch(e.date, repMo, repYr));
+            const repRevTotal = filteredTrans.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            const repExpTotal = filteredExp.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            
+            safeSetText('repTotalRev', `₹${repRevTotal.toLocaleString()}`);
+            safeSetText('repTotalExp', `₹${repExpTotal.toLocaleString()}`);
+            safeSetText('repAdmFee', `₹${filteredTrans.filter(t => t.type === 'Admission').reduce((a,b) => a + Number(b.amount), 0).toLocaleString()}`);
+            safeSetText('repMlyFee', `₹${filteredTrans.filter(t => t.type === 'Monthly').reduce((a,b) => a + Number(b.amount), 0).toLocaleString()}`);
+            safeSetText('repAdvFee', `₹${filteredTrans.filter(t => t.type === 'Advance').reduce((a,b) => a + Number(b.amount), 0).toLocaleString()}`);
+
+            const monthlyRevSum = appState.transactions.filter(t => isPeriodMatch(t.paidDate, currMoIdx, currYr)).reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            const monthlyExpSum = appState.expenses.filter(e => isPeriodMatch(e.date, currMoIdx, currYr)).reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            safeSetText('statProfit', `₹${(monthlyRevSum - monthlyExpSum).toLocaleString()}`);
+            safeSetText('statMonthlyRev', `Rev: ₹${monthlyRevSum.toLocaleString()}`);
+            safeSetText('statMonthlyExp', `Exp: ₹${monthlyExpSum.toLocaleString()}`);
+            safeSetText('statActive', activeStudents.length);
+            safeSetText('statOverdue', overdue.length);
+            safeSetText('statRevenue', `₹${totalRev.toLocaleString()}`);
+            safeSetText('statDebt', `₹${(totalRev * 0.2).toLocaleString()}`);
+
+            const visionProg = (activeStudents.length / 500) * 100;
+            const bar = document.getElementById('visionBar'); if (bar) bar.style.width = Math.min(visionProg, 100) + '%';
+            safeSetText('visionProgressText', `${activeStudents.length} / 500`);
+
+            const monthsPassed = (currYr - 2026) * 12 + currMoIdx;
+            const activePhase = PHASES.find(p => monthsPassed >= p.range[0] && monthsPassed <= (p.range[1] || 99)) || PHASES[0];
+            safeSetText('currentPhaseBadge', activePhase.title);
+            safeSetText('currentPhaseTitle', `Goal: ${activePhase.title}`);
+            safeSetText('currentPhaseDesc', activePhase.desc);
+            safeSetHTML('phaseChecklist', activePhase.checklist.map(item => `<div class="flex items-center gap-3 text-xs font-bold text-slate-700 text-left"><i class="fas fa-check-circle text-blue-500"></i> ${item}</div>`).join(''));
+            safeSetText('growthPhaseTitle', activePhase.title);
+            safeSetText('growthPhaseDesc', activePhase.desc);
+            safeSetHTML('growthChecklist', activePhase.checklist.map(item => `<div class="flex items-center gap-3"><div class="w-5 h-5 bg-white/20 rounded flex items-center justify-center text-[10px]"><i class="fas fa-check"></i></div><span class="text-xs font-bold uppercase tracking-widest text-center">${item}</span></div>`).join(''));
+
+            safeSetHTML('performanceBody', TARGETS.map(target => {
+                const targetMoIdx = MONTH_MAP[target.m];
+                const admissionsCount = appState.students.filter(s => { if (!s.date) return false; const [y, m, d] = s.date.split('-').map(Number); return (m - 1) === targetMoIdx && y === target.y; }).length;
+                const actualRev = appState.transactions.filter(t => { if (!t.paidDate) return false; const [y, m, d] = t.paidDate.split('-').map(Number); return (m - 1) === targetMoIdx && y === target.y; }).reduce((a, b) => a + (Number(b.amount) || 0), 0);
+                const status = activeStudents.length >= target.t ? '✅ Met' : '🚀 Target';
+                return `<tr class="border-b border-gray-50 text-center"><td class="py-4 font-black text-left">${target.m} ${target.y}</td><td class="py-4 text-gray-500 text-left">${target.t} Students</td><td class="py-4 font-black text-center">${admissionsCount}</td><td class="py-4 font-black text-green-600 text-center">₹${actualRev.toLocaleString()}</td><td class="py-4 text-right text-right"><span class="px-2 py-1 rounded-full text-[10px] font-black ${activeStudents.length >= target.t ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">${status}</span></td></tr>`;
+            }).join(''));
+
+            const courseMap = {};
+            filteredTrans.forEach(t => { const s = appState.students.find(stu => stu.id === t.studentId); const cName = s ? s.course : 'General/Bulk'; courseMap[cName] = (courseMap[cName] || 0) + Number(t.amount); });
+            const sortedCourses = Object.entries(courseMap).sort((a,b) => b[1] - a[1]);
+            safeSetHTML('courseRevenueList', sortedCourses.length ? sortedCourses.map(([name, amt]) => `<div class="space-y-2"><div class="flex justify-between text-xs font-black"><span>${name}</span><span>₹${amt.toLocaleString()}</span></div><div class="w-full bg-gray-100 h-2 rounded-full"><div class="bg-blue-600 h-2 rounded-full shadow-sm" style="width: ${Math.min((amt/repRevTotal)*100 || 0, 100)}%"></div></div></div>`).join('') : '<p class="text-sm text-gray-400 italic text-center">No revenue recorded.</p>');
+
+            const refMap = {};
+            appState.students.forEach(s => { if(s.referral) refMap[s.referral] = (refMap[s.referral] || 0) + 1; });
+            safeSetHTML('referralList', Object.entries(refMap).map(([src, count]) => `<div class="bg-indigo-50 p-6 rounded-2xl flex justify-between items-center text-center"><div><p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Source</p><p class="text-sm font-black text-indigo-900">${src}</p></div><span class="bg-white px-3 py-1 rounded-full text-xs font-black text-indigo-600 shadow-sm">${count}</span></div>`).join('') || '<p class="text-xs text-gray-400 italic text-center col-span-full">No referral data tracked.</p>');
+
+            const allHistory = [...appState.transactions.map(t => ({ ...t, kind: 'fee' })), ...appState.expenses.map(e => ({ ...e, kind: 'exp', paidDate: e.date, studentName: e.name }))].sort((a,b) => new Date(b.paidDate) - new Date(a.paidDate));
+            safeSetHTML('transactionList', allHistory.slice(0, 30).map(item => `<div class="flex justify-between items-center p-5 rounded-3xl border ${item.kind === 'fee' ? 'bg-green-50/30 border-green-100' : 'bg-red-50/30 border-red-100'}"><div class="flex-1"><p class="font-black text-slate-800 text-sm">${item.studentName}</p><p class="text-[9px] text-gray-400 font-black uppercase tracking-widest text-center">${item.paidDate} • ${item.kind === 'fee' ? 'FEE COLLECTION' : 'EXPENSE'}</p></div><div class="flex items-center gap-4 text-center"><p class="font-black text-sm ${item.kind === 'fee' ? 'text-green-600' : 'text-red-600'} text-center">${item.kind === 'fee' ? '+' : '-'}₹${item.amount}</p><div class="flex gap-1 text-center"><button onclick="window.editEntry('${item.id}', '${item.kind}')" class="text-gray-300 hover:text-blue-500 transition-colors p-2 text-center"><i class="fas fa-edit text-center"></i></button><button onclick="window.deleteEntry('${item.id}', '${item.kind}')" class="text-gray-300 hover:text-red-500 transition-colors p-2 text-center"><i class="fas fa-trash-alt text-center"></i></button></div></div></div>`).join(''));
+
+            safeSetHTML('studentTableBody', appState.students.map(s => {
+                const isOverdue = new Date(s.nextDueDate) < today && s.status === 'Active';
+                return `<tr class="border-b hover:bg-gray-50/50 transition-all text-sm text-center"><td class="p-6 text-left"><p class="font-black text-slate-800 text-left">${s.name}</p><p class="text-[10px] text-gray-400 font-bold text-left">${s.phone || 'No Phone'}</p></td><td class="p-6 text-xs font-bold max-w-[120px] truncate text-center">${s.course}</td><td class="p-6 font-black text-blue-600 text-center">₹${s.mlyFee}</td><td class="p-6 text-center"><span class="px-3 py-1 rounded-lg font-black text-[10px] ${isOverdue ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'} text-center">${s.nextDueDate}</span></td><td class="p-6 text-center text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">${s.status}</span></td><td class="p-6 flex gap-2 justify-end text-right"><button onclick="window.editStudent('${s.id}')" class="text-gray-400 hover:text-blue-600 p-2 text-right"><i class="fas fa-edit"></i></button><button onclick="window.updateStatus('${s.id}', '${s.status === 'Active' ? 'Stopped' : 'Active'}')" class="text-gray-400 hover:text-blue-600 p-2 text-right text-right"><i class="fas ${s.status === 'Active' ? 'fa-stop-circle' : 'fa-play-circle'}"></i></button><button onclick="window.deleteStudent('${s.id}')" class="text-gray-300 hover:text-red-500 p-2 text-right"><i class="fas fa-trash"></i></button></td></tr>`;
+            }).join(''));
+
+            safeSetHTML('feeStudentSelect', '<option value="">Choose Student...</option>' + activeStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join(''));
+            const al = [{ n: 'Essentials', v: 0.35, c: 'blue' }, { n: 'Reinvestment', v: 0.20, c: 'indigo' }, { n: 'Debt', v: 0.20, c: 'red' }, { n: 'Savings', v: 0.15, c: 'green' }, { n: 'Personal', v: 0.10, c: 'yellow' }];
+            safeSetHTML('allocationStats', `<h4 class="font-black mb-8 text-xl text-center text-center">Vision Allocation Rule</h4>` + al.map(cat => `<div class="mb-6"><div class="flex justify-between text-xs font-black mb-2 text-center"><span>${cat.n} (${cat.v*100}%)</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div><div class="w-full bg-gray-100 h-2 rounded-full text-center"><div class="bg-${cat.c}-500 h-2 rounded-full shadow-sm text-center" style="width:${cat.v*100}%"></div></div></div>`).join(''));
+            safeSetHTML('miniAlloc', al.slice(0, 3).map(cat => `<div class="flex justify-between text-xs font-black opacity-80 text-center"><span>${cat.n}</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div>`).join(''));
+
+            const followUps = activeStudents.filter(s => new Date(s.nextDueDate) <= today).sort((a,b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
+            safeSetHTML('followUpList', followUps.length ? followUps.slice(0, 5).map(s => `<div class="flex justify-between items-center p-3 bg-red-50 border border-red-100 rounded-xl text-center"><span class="text-xs font-bold text-red-700 text-center">${s.name}</span><span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-red-500 text-center">Due: ${s.nextDueDate}</span></div>`).join('') : '<p class="text-sm text-gray-400 italic text-center">No critical follow-ups today.</p>');
         };
+        window.updateUI = updateUI;
 
-        const closeModal = (id) => document.getElementById(id).style.display = 'none';
-        window.closeModal = closeModal; // Make global for UI
-
-        const showTab = (tabId) => {
+        // GLOBALS
+        window.openModal = (id) => { const el = document.getElementById(id); if (el) el.style.display = 'flex'; };
+        window.closeModal = (id) => { const el = document.getElementById(id); if (el) el.style.display = 'none'; if(id === 'studentModal') resetStudentModal(); };
+        window.showTab = (tabId) => {
+            if((tabId === 'growth' || tabId === 'financials' || tabId === 'reports') && !appState.isAuthenticated) {
+                appState.targetTab = tabId; document.getElementById('pinOverlay').classList.remove('hidden'); return;
+            }
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+            const targetEl = document.getElementById(tabId); if (targetEl) targetEl.classList.add('active');
             document.querySelectorAll('.sidebar-item').forEach(el => el.classList.toggle('active', el.getAttribute('onclick').includes(tabId)));
+            const pageTitle = document.getElementById('pageTitle');
+            if (pageTitle) {
+                const titles = { reports: "Strategic Insights", growth: "Roadmap 2026-27", financials: "Financial Vault", dashboard: "Dashboard", students: "Student Database", fees: "Fee & Expenses" };
+                pageTitle.innerText = titles[tabId] || tabId.charAt(0).toUpperCase() + tabId.slice(1);
+            }
             updateUI();
         };
-        window.showTab = showTab;
+        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); };
+        window.pressPin = (num) => { if(appState.currentInputPin.length < 4) { appState.currentInputPin += num; updatePinVisuals(); if(appState.currentInputPin.length === 4) { validatePin(); } } };
+        window.clearPin = () => { appState.currentInputPin = ''; updatePinVisuals(); };
+        window.cancelPin = () => { clearPin(); document.getElementById('pinOverlay').classList.add('hidden'); };
+        const updatePinVisuals = () => { for(let i = 1; i <= 4; i++) { const dot = document.getElementById(`pin-${i}`); if(dot) { if(appState.currentInputPin.length >= i) { dot.classList.add('bg-blue-500', 'border-blue-500', 'scale-110'); } else { dot.classList.remove('bg-blue-500', 'border-blue-500', 'scale-110'); } } } };
+        const validatePin = () => { if(appState.currentInputPin === appState.adminPin) { appState.isAuthenticated = true; showNotif("Access Granted"); document.getElementById('pinOverlay').classList.add('hidden'); window.showTab(appState.targetTab); clearPin(); } else { showNotif("Access Denied"); clearPin(); } };
 
-        const toggleSidebar = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
-        window.toggleSidebar = toggleSidebar;
+        window.handleJoiningDateChange = (val) => {
+            if(!val) return;
+            const date = new Date(val);
+            date.setDate(date.getDate() + 30);
+            const dueInp = document.getElementById('stuDueDate');
+            if(dueInp) dueInp.value = date.toISOString().split('T')[0];
+        };
 
-        // AUTH & SYNC
-        const init = async () => {
-            await signInAnonymously(auth);
-            
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    appState.user = user;
-                    document.getElementById('loadingOverlay').style.opacity = '0';
-                    setTimeout(() => document.getElementById('loadingOverlay').style.display = 'none', 500);
-                    startSync();
+        window.quickAddFeeFromProfile = () => {
+            const sid = document.getElementById('editStudentId').value;
+            if(!sid) return;
+            const student = appState.students.find(s => s.id === sid);
+            window.closeModal('studentModal');
+            window.showTab('fees');
+            setTimeout(() => {
+                const sel = document.getElementById('feeStudentSelect');
+                if(sel) {
+                    sel.value = sid;
+                    const amountInput = document.getElementById('feeAmount');
+                    amountInput.value = student.mlyFee || 0;
                 }
-            });
+            }, 100);
+        };
 
+        const resetStudentModal = () => {
+            document.getElementById('editStudentId').value = '';
+            document.getElementById('enrollmentForm').reset();
+            document.getElementById('studentModalTitle').innerText = "Admission Registry";
+            document.getElementById('studentSubmitBtn').innerText = "Authorize Entry";
+            document.getElementById('studentHistoryPanel').classList.add('hidden');
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             document.getElementById('stuDate').value = today;
-            document.getElementById('feeDate').value = today;
-            const nextMonth = new Date(); nextMonth.setDate(nextMonth.getDate() + 30);
-            document.getElementById('stuDueDate').value = nextMonth.toISOString().split('T')[0];
-            document.getElementById('stuCourse').innerHTML = COURSE_LIST.map(c => `<option value="${c}">${c}</option>`).join('');
+            window.handleJoiningDateChange(today);
+        };
+
+        window.editStudent = (id) => {
+            const s = appState.students.find(stu => stu.id === id);
+            if (!s) return;
+            document.getElementById('editStudentId').value = id;
+            document.getElementById('stuName').value = s.name;
+            document.getElementById('stuCourse').value = s.course;
+            document.getElementById('stuAdmFee').value = s.admFee;
+            document.getElementById('stuMlyFee').value = s.mlyFee;
+            document.getElementById('stuPhone').value = s.phone || '';
+            document.getElementById('stuDate').value = s.date;
+            document.getElementById('stuDueDate').value = s.nextDueDate;
+            document.getElementById('studentModalTitle').innerText = `${s.name}'s Profile`;
+            document.getElementById('studentSubmitBtn').innerText = "Update Registry";
+            document.getElementById('studentHistoryPanel').classList.remove('hidden');
+            const isOverdue = new Date(s.nextDueDate) < new Date();
+            safeSetHTML('stuProfileStats', `<div class="bg-white p-4 rounded-2xl shadow-sm text-center"><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Balance Paid</p><p class="text-lg font-black text-green-600 text-center">₹${(s.totalPaid || 0).toLocaleString()}</p></div><div class="bg-white p-4 rounded-2xl shadow-sm text-center"><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Due Status</p><p class="text-xs font-black ${isOverdue ? 'text-red-600' : 'text-blue-600'} uppercase text-center">${isOverdue ? 'Overdue' : 'Current cycle'}</p></div>`);
+            const history = appState.transactions.filter(t => t.studentId === id).sort((a,b) => new Date(b.paidDate) - new Date(a.paidDate));
+            safeSetHTML('stuPaymentHistoryList', history.length ? history.map(t => `<div class="flex justify-between items-center p-3 bg-white rounded-xl shadow-sm border border-gray-50 text-center"><div><p class="text-[10px] font-black text-slate-700 text-center">${t.type}</p><p class="text-[8px] text-gray-400 font-bold uppercase text-center">${t.paidDate}</p></div><p class="text-sm font-black text-slate-800 text-center">₹${t.amount}</p></div>`).join('') : '<p class="text-[10px] text-gray-400 italic text-center py-10 text-center">No payments linked yet.</p>');
+            window.openModal('studentModal');
+        };
+
+        window.editEntry = (id, kind) => {
+            if (kind === 'exp') {
+                const e = appState.expenses.find(item => item.id === id);
+                if (!e) return;
+                document.getElementById('expName').value = e.name;
+                document.getElementById('expAmount').value = e.amount;
+                document.getElementById('expDate').value = e.date;
+                showNotif("Details loaded. Re-submit to record changes.");
+                return;
+            }
+            const t = appState.transactions.find(item => item.id === id);
+            if (!t) return;
+            document.getElementById('editTransId').value = id;
+            document.getElementById('feeAmount').value = t.amount;
+            document.getElementById('feeType').value = t.type;
+            document.getElementById('feeDate').value = t.paidDate;
+            document.getElementById('feeFormTitle').innerText = "Edit Fee Receipt";
+            document.getElementById('feeSubmitBtn').innerText = "Update Receipt";
+            document.getElementById('studentSelectContainer').classList.add('hidden');
+            document.getElementById('studentNameDisplay').classList.remove('hidden');
+            document.getElementById('editStudentName').innerText = t.studentName;
+            document.getElementById('cancelFeeEditBtn').classList.remove('hidden');
+        };
+
+        window.resetFeeForm = () => {
+            document.getElementById('editTransId').value = '';
+            document.getElementById('feeForm').reset();
+            document.getElementById('feeFormTitle').innerText = "Collect Fee";
+            document.getElementById('feeSubmitBtn').innerText = "Submit Receipt";
+            document.getElementById('studentSelectContainer').classList.remove('hidden');
+            document.getElementById('studentNameDisplay').classList.add('hidden');
+            document.getElementById('cancelFeeEditBtn').classList.add('hidden');
+            document.getElementById('feeDate').value = new Date().toISOString().split('T')[0];
+        };
+
+        window.updateStatus = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id), { status }); showNotif(`Status: ${status}`); };
+        window.deleteStudent = async (id) => { if (confirm("Permanently delete student record?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id)); };
+        window.deleteEntry = async (id, kind) => {
+            if (!confirm(`Delete this entry?`)) return;
+            try {
+                if (kind === 'fee') {
+                    const tRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', id);
+                    const tSnap = await getDoc(tRef);
+                    if (tSnap.exists()) {
+                        const data = tSnap.data();
+                        if (data.studentId) {
+                            const sRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', data.studentId);
+                            const sSnap = await getDoc(sRef);
+                            if (sSnap.exists()) { await updateDoc(sRef, { totalPaid: Math.max(0, (sSnap.data().totalPaid || 0) - Number(data.amount)) }); }
+                        }
+                    }
+                    await deleteDoc(tRef);
+                } else { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'expenses', id)); }
+                showNotif("Entry removed.");
+            } catch (err) { showNotif("Error removing entry."); }
+        };
+
+        window.exportBackup = () => { const data = { students: appState.students, transactions: appState.transactions, expenses: appState.expenses }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `FutureU_Backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); };
+        window.updatePin = async () => {
+            const newPin = document.getElementById('newPin').value;
+            if(newPin.length !== 4 || isNaN(newPin)) { showNotif("PIN must be 4 digits"); return; }
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin'), { pin: newPin });
+            showNotif("PIN Updated"); document.getElementById('newPin').value = '';
+        };
+        window.toggleTask = (type) => { showNotif(`${type.toUpperCase()} recorded.`); };
+
+        window.copyNumbers = () => {
+            const nums = appState.students.filter(s => s.status === 'Active').map(s => s.phone).filter(p => p).join(', ');
+            const dummy = document.createElement("textarea"); document.body.appendChild(dummy);
+            dummy.value = nums; dummy.select(); document.execCommand("copy"); document.body.removeChild(dummy);
+            showNotif("Phone numbers copied!");
         };
 
         const startSync = () => {
             if (!appState.user) return;
-
-            const studentRef = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-            onSnapshot(studentRef, (snapshot) => {
-                appState.students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                updateUI();
-            }, (err) => console.error("Sync Students Error:", err));
-
-            const transRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
-            onSnapshot(transRef, (snapshot) => {
-                appState.transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a,b) => new Date(b.paidDate) - new Date(a.paidDate));
-                updateUI();
-            }, (err) => console.error("Sync Transactions Error:", err));
+            const pinDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin');
+            onSnapshot(pinDocRef, (snap) => { 
+                if(snap.exists()) { 
+                    appState.adminPin = snap.data().pin; 
+                } else { 
+                    setDoc(pinDocRef, { pin: '4568' }); 
+                } 
+            });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snap) => { appState.students = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), (snap) => { appState.transactions = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'expenses'), (snap) => { appState.expenses = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); updateUI(); });
         };
 
-        // UI ENGINE
-        const updateUI = () => {
-            const today = new Date();
-            const activeStudents = appState.students.filter(s => s.status === 'Active');
-            const overdue = activeStudents.filter(s => new Date(s.nextDueDate) < today);
+        async function init() {
+            await signInAnonymously(auth);
+            onAuthStateChanged(auth, (user) => { 
+                if (user) { 
+                    appState.user = user; 
+                    const overlay = document.getElementById('loadingOverlay');
+                    if (overlay) { overlay.style.opacity = '0'; setTimeout(() => overlay.style.display = 'none', 500); }
+                    startSync(); 
+                } 
+            });
+            const today = new Date().toISOString().split('T')[0];
+            const currYr = new Date().getFullYear();
+            safeSetText('currentDate', new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
+            document.getElementById('stuDate').value = today; document.getElementById('feeDate').value = today; document.getElementById('expDate').value = today;
+            window.handleJoiningDateChange(today);
+            safeSetHTML('stuCourse', COURSE_LIST.map(c => `<option value="${c}">${c}</option>`).join(''));
+            const yrSelect = document.getElementById('reportYear');
+            if(yrSelect) yrSelect.innerHTML = [2025, 2026, 2027].map(y => `<option value="${y}" ${y === currYr ? 'selected' : ''}>${y}</option>`).join('');
+            document.getElementById('reportMonth').value = new Date().getMonth();
+        }
 
-            document.getElementById('statActive').innerText = activeStudents.length;
-            document.getElementById('statOverdue').innerText = overdue.length;
-            
-            const totalRev = appState.transactions.reduce((a, b) => a + (Number(b.amount) || 0), 0);
-            document.getElementById('statRevenue').innerText = `₹${totalRev.toLocaleString()}`;
-            document.getElementById('statDebt').innerText = `₹${(totalRev * 0.2).toLocaleString()}`;
-
-            const prog = (activeStudents.length / 100) * 100;
-            document.getElementById('targetProgress').style.width = Math.min(prog, 100) + '%';
-            document.getElementById('targetText').innerText = `${activeStudents.length} / 100 Students`;
-
-            // Table
-            document.getElementById('studentTableBody').innerHTML = appState.students.map(s => {
-                const isOverdue = new Date(s.nextDueDate) < today && s.status === 'Active';
-                return `
-                    <tr class="border-b hover:bg-gray-50 text-sm">
-                        <td class="p-4"><p class="font-bold text-gray-800">${s.name}</p></td>
-                        <td class="p-4"><p class="text-xs truncate max-w-[120px]" title="${s.course}">${s.course}</p></td>
-                        <td class="p-4 font-semibold text-blue-600">₹${s.mlyFee}</td>
-                        <td class="p-4">
-                            <span class="px-2 py-1 rounded-lg font-bold text-[10px] ${isOverdue ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">
-                                ${s.nextDueDate}
-                            </span>
-                        </td>
-                        <td class="p-4">
-                            <span class="px-2 py-1 rounded-full text-[10px] font-bold ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">
-                                ${s.status}
-                            </span>
-                        </td>
-                        <td class="p-4 flex gap-3 items-center">
-                            <button onclick="window.updateStatus('${s.id}', '${s.status === 'Active' ? 'Stopped' : 'Active'}')" class="text-gray-400 hover:text-blue-600 transition-colors">
-                                <i class="fas ${s.status === 'Active' ? 'fa-stop-circle' : 'fa-play-circle'}"></i>
-                            </button>
-                            <button onclick="window.deleteStudent('${s.id}')" class="text-gray-300 hover:text-red-500 transition-colors">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-
-            // Transactions
-            document.getElementById('transactionList').innerHTML = appState.transactions.slice(0, 15).map(t => `
-                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                    <div>
-                        <p class="font-bold text-gray-800">${t.studentName}</p>
-                        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">${t.paidDate} • Cycle: ${t.cycleDueDate}</p>
-                    </div>
-                    <p class="font-bold text-green-600 text-sm">+₹${t.amount}</p>
-                </div>
-            `).join('');
-
-            // Follow-ups
-            const followUps = overdue.sort((a,b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
-            document.getElementById('followUpList').innerHTML = followUps.length ? followUps.slice(0, 5).map(s => `
-                <div class="flex justify-between items-center p-3 bg-red-50 border border-red-100 rounded-xl">
-                    <span class="text-xs font-bold text-red-700">${s.name}</span>
-                    <span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-red-500 shadow-sm">Due: ${s.nextDueDate}</span>
-                </div>
-            `).join('') : '<p class="text-sm text-gray-400 italic">Everyone is up to date!</p>';
-
-            // Select
-            document.getElementById('feeStudentSelect').innerHTML = '<option value="">Select Student...</option>' + 
-                activeStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-
-            // Allocation
-            const al = [{ n: 'Essentials', v: 0.35, c: 'blue' }, { n: 'Reinvestment', v: 0.20, c: 'indigo' }, { n: 'Debt', v: 0.20, c: 'red' }, { n: 'Savings', v: 0.15, c: 'green' }, { n: 'Personal', v: 0.10, c: 'yellow' }];
-            document.getElementById('allocationStats').innerHTML = `<h4 class="font-bold mb-6 text-xl">Monthly Budget Allocation</h4>` + al.map(cat => `
-                <div class="mb-5">
-                    <div class="flex justify-between text-xs font-bold mb-1"><span>${cat.n} (${cat.v*100}%)</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span></div>
-                    <div class="w-full bg-gray-100 h-1.5 rounded-full"><div class="bg-${cat.c}-500 h-1.5 rounded-full" style="width:${cat.v*100}%"></div></div>
-                </div>
-            `).join('');
-
-            document.getElementById('miniAlloc').innerHTML = al.slice(0, 3).map(cat => `
-                <div class="flex justify-between text-xs font-medium opacity-80">
-                    <span>${cat.n}</span><span>₹${Math.floor(totalRev*cat.v).toLocaleString()}</span>
-                </div>
-            `).join('');
-        };
-
-        // ACTIONS
         document.getElementById('enrollmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const student = {
-                name: document.getElementById('stuName').value,
-                course: document.getElementById('stuCourse').value,
-                admFee: Number(document.getElementById('stuAdmFee').value),
-                mlyFee: Number(document.getElementById('stuMlyFee').value),
-                date: document.getElementById('stuDate').value,
-                nextDueDate: document.getElementById('stuDueDate').value,
-                status: 'Active',
-                totalPaid: 0,
-                createdAt: new Date().toISOString()
-            };
+            const id = document.getElementById('editStudentId').value;
+            const data = { name: document.getElementById('stuName').value, course: document.getElementById('stuCourse').value, admFee: Number(document.getElementById('stuAdmFee').value), mlyFee: Number(document.getElementById('stuMlyFee').value), phone: document.getElementById('stuPhone').value, date: document.getElementById('stuDate').value, nextDueDate: document.getElementById('stuDueDate').value };
             try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), student);
-                showNotif('Student enrolled to cloud!');
-                closeModal('studentModal');
-                e.target.reset();
-            } catch (err) { alert("Error saving student"); }
+                if (id) { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id), data); showNotif("Record Updated!"); }
+                else {
+                    const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), { ...data, status: 'Active', totalPaid: data.admFee, createdAt: new Date().toISOString() });
+                    if (data.admFee > 0) await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: docRef.id, studentName: data.name, amount: data.admFee, type: 'Admission', paidDate: data.date, cycleDueDate: 'Joining Day' });
+                    showNotif('Student Enrolled!');
+                }
+                window.closeModal('studentModal');
+            } catch (err) { showNotif("Error saving entry"); }
         });
 
         document.getElementById('feeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const sId = document.getElementById('feeStudentSelect').value;
+            const editId = document.getElementById('editTransId').value;
             const amount = Number(document.getElementById('feeAmount').value);
+            const type = document.getElementById('feeType').value;
             const paidDate = document.getElementById('feeDate').value;
-            const student = appState.students.find(s => s.id == sId);
-            const oldDue = student.nextDueDate;
-
-            const nextDueObj = new Date(paidDate);
-            nextDueObj.setDate(nextDueObj.getDate() + 30);
-            const nextDueDate = nextDueObj.toISOString().split('T')[0];
-
             try {
-                // Add Transaction
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), {
-                    studentId: sId, studentName: student.name, amount, type: document.getElementById('feeType').value,
-                    paidDate, cycleDueDate: oldDue
-                });
-                // Update Student
-                const sRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', sId);
-                await updateDoc(sRef, { nextDueDate, totalPaid: (student.totalPaid || 0) + amount });
-                
-                showNotif('Payment synced successfully!');
-                e.target.reset();
-            } catch (err) { alert("Error saving payment"); }
+                if (editId) {
+                    const tRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', editId);
+                    const tSnap = await getDoc(tRef);
+                    if (tSnap.exists()) {
+                        const oldData = tSnap.data();
+                        const diff = amount - oldData.amount;
+                        if (oldData.studentId && diff !== 0) {
+                            const sRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', oldData.studentId);
+                            const sSnap = await getDoc(sRef);
+                            if (sSnap.exists()) { await updateDoc(sRef, { totalPaid: (sSnap.data().totalPaid || 0) + diff }); }
+                        }
+                        await updateDoc(tRef, { amount, type, paidDate });
+                        showNotif("Receipt Updated!");
+                    }
+                } else {
+                    const sId = document.getElementById('feeStudentSelect').value;
+                    const student = appState.students.find(s => s.id == sId);
+                    
+                    let nextDueDate = student.nextDueDate;
+                    if (type === 'Monthly' || type === 'Advance') {
+                        const nextDueObj = new Date(student.nextDueDate);
+                        nextDueObj.setDate(nextDueObj.getDate() + 30);
+                        nextDueDate = nextDueObj.toISOString().split('T')[0];
+                    }
+
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), { studentId: sId, studentName: student.name, amount, type, paidDate, cycleDueDate: student.nextDueDate });
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', sId), { nextDueDate, totalPaid: (student.totalPaid || 0) + amount });
+                    showNotif('Receipt Synced!');
+                }
+                resetFeeForm();
+            } catch (err) { showNotif("Error recording fee"); }
         });
 
-        window.updateStatus = async (id, status) => {
-            const sRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', id);
-            await updateDoc(sRef, { status });
-            showNotif(`Status updated to ${status}`);
-        };
+        document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'expenses'), { name: document.getElementById('expName').value, amount: Number(document.getElementById('expAmount').value), date: document.getElementById('expDate').value });
+                showNotif('Expense Authorized!'); e.target.reset();
+            } catch (err) { showNotif("Error logging expense"); }
+        });
 
-        window.deleteStudent = async (id) => {
-            if (confirm("Permanently delete student record?")) {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id));
-                showNotif("Record deleted");
-            }
-        };
-
-        window.openModal = (id) => document.getElementById(id).style.display = 'flex';
-
-        init();
+        init().catch(console.error);
     </script>
 </body>
 </html>
