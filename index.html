@@ -602,7 +602,7 @@
 
             safeSetHTML('studentTableBody', appState.students.map(s => {
                 const isOverdue = new Date(s.nextDueDate) < today && s.status === 'Active';
-                return `<tr class="border-b hover:bg-gray-50/50 transition-all text-sm"><td class="p-6"><p class="font-black text-slate-800">${s.name}</p><p class="text-[10px] text-gray-400 font-bold">${s.phone || 'No Phone'}</p></td><td class="p-6 text-xs font-bold max-w-[120px] truncate">${s.course}</td><td class="p-6 font-black text-blue-600 text-center">₹${s.mlyFee}</td><td class="p-6 text-center"><span class="px-3 py-1 rounded-lg font-black text-[10px] ${isOverdue ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${s.nextDueDate}</span></td><td class="p-6 text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">${s.status}</span></td><td class="p-6 flex gap-2 justify-end"><button onclick="window.editStudent('${s.id}')" class="text-gray-400 hover:text-blue-600 p-2"><i class="fas fa-user-pen"></i></button><button onclick="window.updateStatus('${s.id}', '${s.status === 'Active' ? 'Stopped' : 'Active'}')" class="text-gray-400 hover:text-blue-600 p-2"><i class="fas ${s.status === 'Active' ? 'fa-stop-circle' : 'fa-play-circle'}"></i></button></td></tr>`;
+                return `<tr class="border-b hover:bg-gray-50/50 transition-all text-sm"><td class="p-6"><p class="font-black text-slate-800">${s.name}</p><p class="text-[10px] text-gray-400 font-bold">${s.phone || 'No Phone'}</p></td><td class="p-6 text-xs font-bold max-w-[120px] truncate">${s.course}</td><td class="p-6 font-black text-blue-600 text-center">₹${s.mlyFee}</td><td class="p-6 text-center"><span class="px-3 py-1 rounded-lg font-black text-[10px] ${isOverdue ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${s.nextDueDate}</span></td><td class="p-6 text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black ${s.status === 'Active' ? 'status-badge-active' : 'status-badge-stopped'}">${s.status}</span></td><td class="p-6 flex gap-2 justify-end"><button onclick="window.editStudent('${s.id}')" class="text-gray-400 hover:text-blue-600 p-2" title="Edit Profile"><i class="fas fa-user-pen"></i></button><button onclick="window.updateStatus('${s.id}', '${s.status === 'Active' ? 'Stopped' : 'Active'}')" class="text-gray-400 hover:text-blue-600 p-2" title="Toggle Status"><i class="fas ${s.status === 'Active' ? 'fa-stop-circle' : 'fa-play-circle'}"></i></button><button onclick="window.deleteStudent('${s.id}')" class="text-gray-300 hover:text-red-500 p-2" title="Delete Student"><i class="fas fa-trash-alt"></i></button></td></tr>`;
             }).join(''));
 
             safeSetHTML('feeStudentSelect', '<option value="">Choose Student...</option>' + activeStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join(''));
@@ -732,6 +732,17 @@
 
         window.updateStatus = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id), { status }); showNotif(`Student is now ${status}`); };
         
+        window.deleteStudent = async (id) => {
+            if (confirm("Permanently delete this student record? This will not remove their historical transaction data from the ledger.")) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id));
+                    showNotif("Student record removed.");
+                } catch (err) {
+                    showNotif("Error deleting student.");
+                }
+            }
+        };
+
         window.deleteEntry = async (id, kind) => {
             if (!confirm(`Permanently delete this ${kind === 'fee' ? 'receipt' : 'expense'}?`)) return;
             try {
